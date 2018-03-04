@@ -626,9 +626,8 @@ function respond (from_address, text, response = '') {
 											});
 
 									}, (bIsNeededNextCall) => {
-										if (!bIsNeededNextCall) return;
-
-										callLastScenarioChecks();
+										if (bIsNeededNextCall)
+											callLastScenarioChecks();
 									}); // mutex.lock userInfo.user_address
 
 								}
