@@ -217,9 +217,9 @@ function checkPayment(row, onDone) {
 		return onDone("Received payment in wrong asset");
 	}
 
-	if (row.amount < row.price) {
-		let text = `Received ${row.amount} Bytes from you, which is less than the expected ${row.price} Bytes.`;
-		return onDone(text + '\n\n' + texts.pleasePay(row.receiving_address, row.price));
+	if (row.amount < conf.priceInBytes) {
+		let text = `Received ${row.amount} Bytes from you, which is less than the expected ${conf.priceInBytes} Bytes.`;
+		return onDone(text + '\n\n' + texts.pleasePay(row.receiving_address, conf.priceInBytes));
 	}
 
 	function resetUserAddress(){
