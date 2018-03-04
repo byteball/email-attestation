@@ -469,6 +469,9 @@ function respond (from_address, text, response = '') {
 											(rows) => {
 												let row = rows[0];
 
+												if (row.result !== null)
+													return unlock(true);
+												
 												/**
 												 * if user still did not enter correct verification code
 												 */
