@@ -415,7 +415,7 @@ function respond (from_address, text, response = '') {
 							let transaction_id = row.transaction_id;
 
 							/**
-							 * if user payed, but transaction did not become stable
+							 * if user paid, but transaction did not become stable
 							 */
 							if (row.is_confirmed === 0) {
 								return device.sendMessageToDevice(
@@ -437,9 +437,9 @@ function respond (from_address, text, response = '') {
 								if (text === 'send email again') {
 									return db.query(
 										`UPDATE verification_emails 
-										SET is_sent=?
+										SET is_sent=0
 										WHERE transaction_id=? AND user_email=?`,
-										[0, transaction_id, userInfo.user_email],
+										[transaction_id, userInfo.user_email],
 										() => {
 											sendVerificationCodeToEmailAndMarkIsSent(userInfo.user_email, row.code, transaction_id, from_address);
 										}
@@ -481,9 +481,9 @@ function respond (from_address, text, response = '') {
 
 														return db.query(
 															`UPDATE verification_emails 
-															SET result=?, result_date=${db.getNow()}
+															SET result=1, result_date=${db.getNow()}
 															WHERE transaction_id=? AND user_email=?`,
-															[1, transaction_id, userInfo.user_email],
+															[transaction_id, userInfo.user_email],
 															() => {
 																unlock(false);
 
