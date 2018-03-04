@@ -126,7 +126,7 @@ function findReferral(payment_unit, handleReferral) {
 				address, user_address, device_address, payload, app
 			FROM attestations
 			JOIN messages USING(unit, message_index)
-			JOIN attestation_units ON unit=attestation_unit AND attestation_type='real name'
+			JOIN attestation_units ON unit=attestation_unit
 			JOIN transactions USING(transaction_id)
 			JOIN receiving_addresses USING(receiving_address)
 			WHERE address IN(${arrAddresses.map(db.escape).join(', ')}) 
