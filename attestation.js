@@ -336,7 +336,7 @@ function respond (from_address, text, response = '') {
 
 		function checkUserEmail(onDone) {
 			if (validationUtils.isValidEmail(text)) {
-				userInfo.user_email = text;
+				userInfo.user_email = text.toLowerCase();
 				response += texts.goingToAttestEmail(userInfo.user_email);
 				return db.query(
 					'UPDATE users SET user_email=? WHERE device_address=? AND user_address=?',
