@@ -389,7 +389,7 @@ function respond (from_address, text, response = '') {
 
 					db.query(
 						`SELECT
-							transaction_id, is_confirmed, received_amount, user_address,
+							transaction_id, is_confirmed, received_amount, user_address, user_email,
 							code, result, attestation_date
 						FROM transactions
 						JOIN receiving_addresses USING(receiving_address)
@@ -438,10 +438,10 @@ function respond (from_address, text, response = '') {
 									return db.query(
 										`UPDATE verification_emails 
 										SET is_sent=0
-										WHERE transaction_id=? AND user_email=?`,
-										[transaction_id, userInfo.user_email],
+										WHERE transaction_id=?`,
+										[transaction_id],
 										() => {
-											sendVerificationCodeToEmailAndMarkIsSent(userInfo.user_email, row.code, transaction_id, from_address);
+											sendVerificationCodeToEmailAndMarkIsSent(row.user_email, row.code, transaction_id, from_address);
 										}
 									);
 								} else if (text === 'private' || text === 'public') {
@@ -484,15 +484,15 @@ function respond (from_address, text, response = '') {
 													return db.query(
 														`UPDATE verification_emails 
 														SET result=1, result_date=${db.getNow()}
-														WHERE transaction_id=? AND user_email=?`,
-														[transaction_id, userInfo.user_email],
+														WHERE transaction_id=?`,
+														[transaction_id],
 														() => {
 															unlock(false);
 
 															device.sendMessageToDevice(
 																from_address,
 																'text',
-																(response ? response + '\n\n' : '') + texts.codeConfirmedEmailInAttestation(userInfo.user_email)
+																(response ? response + '\n\n' : '') + texts.codeConfirmedEmailInAttestation(row.user_email)
 															);
 
 															db.query(
@@ -504,7 +504,7 @@ function respond (from_address, text, response = '') {
 
 																	let	[attestation, src_profile] = emailAttestation.getAttestationPayloadAndSrcProfile(
 																		userInfo.user_address,
-																		userInfo.user_email,
+																		row.user_email,
 																		row.post_publicly
 																	);
 
@@ -515,13 +515,13 @@ function respond (from_address, text, response = '') {
 																		src_profile,
 																	);
 
-																	if (checkIsEmailQualifiedForReward(userInfo.user_email) && conf.rewardInUSD) {
+																	if (checkIsEmailQualifiedForReward(row.user_email) && conf.rewardInUSD) {
 																		let rewardInBytes = conversion.getPriceInBytes(conf.rewardInUSD);
 																		db.query(
 																			`INSERT ${db.getIgnore()} INTO reward_units
 																			(transaction_id, user_address, user_email, user_id, reward)
 																			VALUES (?,?,?,?,?)`,
-																			[transaction_id, userInfo.user_address, userInfo.user_email, attestation.profile.user_id, rewardInBytes],
+																			[transaction_id, userInfo.user_address, row.user_email, attestation.profile.user_id, rewardInBytes],
 																			(res) => {
 																				console.error(`reward_units insertId: ${res.insertId}, affectedRows: ${res.affectedRows}`);
 																				if (!res.affectedRows) {
@@ -594,7 +594,7 @@ function respond (from_address, text, response = '') {
 																device.sendMessageToDevice(
 																	from_address,
 																	'text',
-																	(response ? response + '\n\n' : '') + texts.emailWasSent(userInfo.user_email)
+																	(response ? response + '\n\n' : '') + texts.emailWasSent(row.user_email)
 																);
 
 															}
@@ -654,7 +654,7 @@ function respond (from_address, text, response = '') {
 									return device.sendMessageToDevice(
 										from_address,
 										'text',
-										(response ? response + '\n\n' : '') + texts.codeConfirmedEmailInAttestation(userInfo.user_email)
+										(response ? response + '\n\n' : '') + texts.codeConfirmedEmailInAttestation(row.user_email)
 									);
 								}
 
