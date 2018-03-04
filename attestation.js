@@ -584,8 +584,8 @@ function respond (from_address, text, response = '') {
 															return db.query(
 																`UPDATE verification_emails 
 																SET number_of_attempts=? 
-																WHERE transaction_id=? AND user_email=?`,
-																[currNumberAttempts, transaction_id, userInfo.user_email],
+																WHERE transaction_id=?`,
+																[currNumberAttempts, transaction_id],
 																() => {
 																	unlock(false);
 
@@ -603,9 +603,9 @@ function respond (from_address, text, response = '') {
 															 */
 															return db.query(
 																`UPDATE verification_emails 
-																SET number_of_attempts=?, result=?, result_date=${db.getNow()}
-																WHERE transaction_id=? AND user_email=?`,
-																[currNumberAttempts, 0, transaction_id, userInfo.user_email],
+																SET number_of_attempts=?, result=0, result_date=${db.getNow()}
+																WHERE transaction_id=?`,
+																[currNumberAttempts, transaction_id],
 																() => {
 																	unlock(false);
 

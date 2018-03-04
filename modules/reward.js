@@ -118,6 +118,7 @@ function findReferrer(payment_unit, handleReferrer) {
 		);
 	}
 
+	// the referrer doesn't have to have a whitelisted email
 	function selectReferrer() {
 		let arrAddresses = Object.keys(assocMcisByAddress);
 		console.log('ancestor addresses: '+arrAddresses.join(', '));
