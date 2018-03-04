@@ -3,29 +3,28 @@
 const desktopApp = require('byteballcore/desktop_app.js');
 const conf = require('byteballcore/conf');
 
-const arrListOfWhiteEmails = Object.keys(conf.objRewardWhiteListEmails);
+const arrWhitelistEmails = Object.keys(conf.objRewardWhiteListEmails);
 
 /**
  * responses for clients
  */
 exports.greeting = () => {
 	return [
-		"Here you can attest your email.\n\n",
+		"Here you can attest your email address.\n\n",
 
-		"Your email will be saved privately in your wallet, ",
-		"only a proof of attestation will be posted publicly on the distributed ledger. ",
-		"The very fact of being attested may give you access to some services or tokens, even without disclosing your email. ",
-		"Some apps may request you to reveal of your attested email, you choose what to reveal and to which app.\n\n",
+		"Your email will be linked to your Byteball address, the link can be either made public (if you choose so) or saved privately in your wallet. ",
+		"In the latter case, only a proof of attestation will be posted publicly on the distributed ledger. ",
+	//	"The very fact of being attested may give you access to some services or tokens, even without disclosing your email. ",
+	//	"Some apps may request you to reveal your privately attested email to them in order to be able to access the apps.",
+		"\n\n",
 
-		"You may also choose to make your attested email public.\n\n",
-
-		`The price of attestation is ${conf.priceInBytes} Bytes. `,
+		`The price of attestation is ${conf.priceInBytes/1e9} GB. `,
 		"The payment is nonrefundable even if the attestation fails for any reason.\n\n",
 
-		"After payment, you will be received email with verification code. Verification code You will need to click at the specified link.\n\n",
+		"After payment, you will be able to prove your email by receiving a verification code and entering it here.\n\n",
 
-		`After you successfully verify email for the first time, `,
-		`and if your email corresponds to:\n${arrListOfWhiteEmails.join(';\n')}.\n`,
+		`After you successfully verify your email address for the first time, `,
+		`and if your email is on one of the following domains:\n${arrWhitelistEmails.join(',\n')},\n`,
 		`you receive a $${conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})} reward in Bytes.`
 	].join('');
 };
@@ -35,7 +34,7 @@ exports.weHaveReferralProgram = () => {
 		"Remember, we have a referral program: " +
 		"if you send Bytes from your attested address to a new user who is not attested yet, " +
 		"and he/she uses those Bytes to pay for a successful attestation, " +
-		`and he/she uses attestation email corresponds to:\n${arrListOfWhiteEmails.join(';\n')}.\n` +
+		`and his/her email is on one of the following domains:\n${arrWhitelistEmails.join(',\n')},\n` +
 		`you receive a $${conf.referralRewardInUSD.toLocaleString([], {minimumFractionDigits: 2})} reward in Bytes.`
 	].join('');
 };
@@ -54,7 +53,7 @@ exports.insertMyEmail = () => {
 };
 
 exports.goingToAttestAddress = (address) => {
-	return `Thanks, going to attest your address: ${address}.`;
+	return `Thanks, going to attest your BB address: ${address}.`;
 };
 
 exports.goingToAttestEmail = (email) => {
@@ -63,21 +62,21 @@ exports.goingToAttestEmail = (email) => {
 
 exports.privateOrPublic = () => {
 	return [
-		"Store your email privately in your wallet (recommended) or post it publicly?\n\n",
+		"Store your email privately in your wallet or post it publicly?  If you choose public, every user will be able to send money to you using your email address instead of Byteball address.\n\n",
 		"[private](command:private)\t[public](command:public)"
 	].join('');
 };
 
 exports.privateChoose = () => {
 	return [
-		"Your email will be kept private and stored in your wallet.\n",
+		"Your email address will be kept private and stored in your wallet.\n",
 		"Click [public](command:public) now if you changed your mind."
 	].join('');
 };
 
 exports.publicChoose = () => {
 	return [
-		"Your email will be posted into the public database and will be available for everyone.\n",
+		"Your email address will be posted into the public database and will be visible to everyone.  You cannot remove it later.\n\n",
 		"Click [private](command:private) now if you changed your mind."
 	].join('');
 };
@@ -103,11 +102,11 @@ exports.receivedPaymentNotFromExpectedAddress = (address) => {
 };
 
 exports.receivedYourPayment = (amount) => {
-	return `Received your payment of ${amount} Bytes, waiting for confirmation. It should take 5-15 minutes.`;
+	return `Received your payment of ${amount/1e9} GB, waiting for confirmation. It should take 5-15 minutes.`;
 };
 
 exports.paymentIsConfirmed = () => {
-	return "Your payment is confirmed. Email will be send to your specified email address.";
+	return "Your payment is confirmed. A confirmation email will be sent to your email address.";
 };
 
 exports.wrongVerificationCode = (leftNumberOfAttempts) => {
@@ -116,14 +115,14 @@ exports.wrongVerificationCode = (leftNumberOfAttempts) => {
 
 exports.emailWasSent = (emailAddress) => {
 	return [
-		`Email was sent to the ${emailAddress}. Enter to the chat verification code, specified in email.\n`,
-		"If you don't receive email, click [send email again](command:send email again)."
+		`A verification code was sent to ${emailAddress}. Please enter the verification code here.\n`,
+		"If you did't receive the email, check your spam folder, and if you don't find it there, click [send email again](command:send email again)."
 	].join('');
 };
 
 exports.attestedSuccessFirstTimeBonus = (rewardInBytes) => {
 	return [
-		"You requested an attestation for the first time and will receive a welcome bonus ",
+		"You attested your email for the first time and will receive a welcome bonus ",
 		`of $${conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})} `,
 		`(${(rewardInBytes/1e9).toLocaleString([], {maximumFractionDigits: 9})} GB) `,
 		"from Byteball distribution fund."
@@ -132,7 +131,7 @@ exports.attestedSuccessFirstTimeBonus = (rewardInBytes) => {
 
 exports.referredUserBonus = (referralRewardInBytes) => {
 	return [
-		"You referred a user who has just verified his identity and you will receive a reward ",
+		"You referred a user who has just verified his email address and you will receive a reward ",
 		`of $${conf.referralRewardInUSD.toLocaleString([], {minimumFractionDigits: 2})} `,
 		`(${(referralRewardInBytes/1e9).toLocaleString([], {maximumFractionDigits: 9})} GB) `,
 		"from Byteball distribution fund.\n",
@@ -141,7 +140,7 @@ exports.referredUserBonus = (referralRewardInBytes) => {
 };
 
 exports.codeConfirmedEmailInAttestation = (email) => {
-	return `Verification code was confirmed. Your email ${email} is in attestation. Please, wait.`;
+	return `Your email address ${email} is now confirmed. Posting an atestation record, please wait.`;
 };
 
 exports.alreadyAttested = (attestationDate) => {
@@ -158,21 +157,21 @@ exports.previousAttestationFailed = () => {
 /**
  * email
  */
-exports.emailSubjectEmailAttestation = () => {
+exports.verificationEmailSubject = () => {
 	return "Email verification";
 };
-exports.emailPlainBodyEmailAttestation = (verificationCode) => {
+exports.verificationEmailText = (verificationCode) => {
 	return [
 		`Your verification code is ${verificationCode}\n`,
-		`Enter this code to chat with "${conf.deviceName}"`,
+		`Please enter this code in chat with "${conf.deviceName}"`,
 	].join('');
 };
-exports.emailBodyEmailAttestation = (verificationCode) => {
+exports.verificationEmailHtml = (verificationCode) => {
 	return [
-		`<p>Your verification code is <h3>${verificationCode}</h3></p>`,
-		`<p>Enter this code to chat with "${conf.deviceName}"</p>`,
+		`<p>Your verification code is <b>${verificationCode}</b></p>`,
+		`<p>Please enter this code in chat with "${conf.deviceName}"</p>`,
 		'<p style="font-size: 13px; color: #727272; margin-top: 15px;">-------',
-		'<br>Please do not reply directly to this email.',
+		'<br>Please do not reply to this email.',
 		'</p>'
 	].join('');
 };

@@ -283,9 +283,9 @@ function sendVerificationCodeToEmailAndMarkIsSent(user_email, code, transaction_
 	mail.sendmail({
 		from: `${conf.from_email_name ? conf.from_email_name + ' ' : ''}<${conf.from_email}>`,
 		to: user_email,
-		subject: texts.emailSubjectEmailAttestation(),
-		body: texts.emailPlainBodyEmailAttestation(code),
-		htmlBody: texts.emailBodyEmailAttestation(code)
+		subject: texts.verificationEmailSubject(),
+		body: texts.verificationEmailText(code),
+		htmlBody: texts.verificationEmailHtml(code)
 	}, (err) => {
 		if (err) {
 			console.error(err);
