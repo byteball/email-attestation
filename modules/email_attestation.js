@@ -72,7 +72,7 @@ function postAndWriteAttestation(transaction_id, attestor_address, attestation_p
 								};
 								let base64PrivateProfile = Buffer.from(JSON.stringify(private_profile)).toString('base64');
 								text += "\n\nClick here to save the profile in your wallet: [private profile](profile:"+base64PrivateProfile+"). " +
-									"You will be able to use it to access the services that require a proven identity.";
+									"You will be able to use it to access the services that require a proven email address.";
 							}
 
 							text += "\n\n" + texts.weHaveReferralProgram();
@@ -139,18 +139,14 @@ function postAttestation(attestor_address, payload, onDone) {
 }
 
 function getUserId(profile){
-	let shortProfile = {
-		email: profile.email
-	};
-	return objectHash.getBase64Hash([shortProfile, conf.salt]);
+	return objectHash.getBase64Hash([profile, conf.salt]);
 }
 
 function getAttestationPayloadAndSrcProfile(user_address, email, bPublic) {
 	let profile = {
-		email
+		email: email
 	};
 	if (bPublic) {
-		//	throw "public";
 		profile.user_id = getUserId(profile);
 		let attestation = {
 			address: user_address,
