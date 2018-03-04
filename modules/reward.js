@@ -90,14 +90,14 @@ function retrySendingRewards() {
 	retrySendingRewardsOfType('referral');
 }
 
-function findReferral(payment_unit, handleReferral) {
+function findReferrer(payment_unit, handleReferrer) {
 	let assocMcisByAddress = {};
 	let depth = 0;
 
 	function goBack(arrUnits) {
 		depth++;
 		// console.error('goBack', depth, arrUnits);
-		if (!arrUnits || !arrUnits.length) return handleReferral();
+		if (!arrUnits || !arrUnits.length) return handleReferrer();
 		db.query(
 			`SELECT 
 				address, src_unit, main_chain_index 
@@ -113,12 +113,12 @@ function findReferral(payment_unit, handleReferral) {
 						assocMcisByAddress[row.address] = row.main_chain_index;
 				});
 				let arrSrcUnits = rows.map((row) => row.src_unit);
-				(depth < conf.MAX_REFERRAL_DEPTH) ? goBack(arrSrcUnits) : selectReferral();
+				(depth < conf.MAX_REFERRAL_DEPTH) ? goBack(arrSrcUnits) : selectReferrer();
 			}
 		);
 	}
 
-	function selectReferral() {
+	function selectReferrer() {
 		let arrAddresses = Object.keys(assocMcisByAddress);
 		console.log('ancestor addresses: '+arrAddresses.join(', '));
 		db.query(
@@ -135,8 +135,8 @@ function findReferral(payment_unit, handleReferral) {
 			[attestation.emailAttestorAddress, payment_unit],
 			(rows) => {
 				if (rows.length === 0){
-					console.log("no referrals for payment unit "+payment_unit);
-					return handleReferral();
+					console.log("no referrers for payment unit "+payment_unit);
+					return handleReferrer();
 				}
 
 				let max_mci = 0;
@@ -170,7 +170,7 @@ function findReferral(payment_unit, handleReferral) {
 					throw Error("no best for payment " + payment_unit);
 				}
 
-				handleReferral(best_user_id, best_row.user_address, best_row.device_address);
+				handleReferrer(best_user_id, best_row.user_address, best_row.device_address);
 			}
 		);
 	}
@@ -181,4 +181,4 @@ function findReferral(payment_unit, handleReferral) {
 
 exports.sendAndWriteReward = sendAndWriteReward;
 exports.retrySendingRewards = retrySendingRewards;
-exports.findReferral = findReferral;
+exports.findReferrer = findReferrer;
