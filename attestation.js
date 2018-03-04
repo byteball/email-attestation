@@ -371,7 +371,7 @@ function respond (from_address, text, response = '') {
 							WHERE device_address=? AND user_address=? AND user_email=?`,
 							[post_publicly, from_address, userInfo.user_address, userInfo.user_email]
 						);
-						response += (text === "private") ? texts.privateChoose() : texts.publicChoose();
+						response += (text === "private") ? texts.privateChosen() : texts.publicChosen();
 					}
 
 					if (post_publicly === null) {
@@ -383,7 +383,7 @@ function respond (from_address, text, response = '') {
 							from_address,
 							'text',
 							(response ? response + '\n\n' : '') + texts.pleasePay(receiving_address, price) + '\n\n' +
-							((post_publicly === 0) ? texts.privateChoose() : texts.publicChoose())
+							((post_publicly === 0) ? texts.privateChosen() : texts.publicChosen())
 						);
 					}
 

@@ -67,14 +67,14 @@ exports.privateOrPublic = () => {
 	].join('');
 };
 
-exports.privateChoose = () => {
+exports.privateChosen = () => {
 	return [
 		"Your email address will be kept private and stored in your wallet.\n",
 		"Click [public](command:public) now if you changed your mind."
 	].join('');
 };
 
-exports.publicChoose = () => {
+exports.publicChosen = () => {
 	return [
 		"Your email address will be posted into the public database and will be visible to everyone.  You cannot remove it later.\n\n",
 		"Click [private](command:private) now if you changed your mind."
