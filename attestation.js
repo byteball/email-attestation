@@ -24,8 +24,10 @@ eventBus.on('paired', (from_address) => {
 /**
  * user sends message to the bot
  */
-eventBus.on('text', (from_address, text) => {
-	respond(from_address, text.trim());
+eventBus.once('headless_and_rates_ready', () => {  // we need rates to handle some messages
+	eventBus.on('text', (from_address, text) => {
+		respond(from_address, text.trim());
+	});
 });
 
 /**
@@ -34,7 +36,7 @@ eventBus.on('text', (from_address, text) => {
 eventBus.on('new_my_transactions', handleNewTransactions);
 
 /**
- * pay is confirmed
+ * payment is confirmed
  */
 eventBus.on('my_transactions_became_stable', handleTransactionsBecameStable);
 
@@ -85,7 +87,6 @@ function handleWalletReady() {
 		headlessWallet.issueOrSelectAddressByIndex(0, 0, (address1) => {
 			console.log('== email attestation address: ' + address1);
 			emailAttestation.emailAttestorAddress = address1;
-			// reward.distributionAddress = address1;
 
 			headlessWallet.issueOrSelectAddressByIndex(0, 1, (address2) => {
 				console.log('== distribution address: ' + address2);
