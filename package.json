@@ -1,9 +1,9 @@
 {
-  "name": "byteball-email-attestation-bot",
+  "name": "email-attestation",
   "version": "1.0.0",
-  "description": "A byteball bot for attestation of email",
-  "main": "index.js",
-  "repository": "https://github.com/temikng/byteball-email-attestation-bot.git",
+  "description": "A byteball bot for attestation of email address",
+  "main": "attestation.js",
+  "repository": "https://github.com/byteball/email-attestation.git",
   "author": "temikn <temikng@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -11,7 +11,6 @@
     "byteball-witness": "git+https://github.com/byteball/byteball-witness.git",
     "byteballcore": "git+https://github.com/byteball/byteballcore.git",
     "emailjs": "^2.0.0",
-    "express": "^4.16.2",
     "headless-byteball": "git+https://github.com/byteball/headless-byteball.git",
     "request": "2.83.0"
   }

@@ -10,7 +10,7 @@ const headlessWallet = require('headless-byteball');
 const texts = require('./modules/texts');
 const reward = require('./modules/reward');
 const conversion = require('./modules/conversion');
-const emailAttestation = require('./modules/attestation');
+const emailAttestation = require('./modules/email_attestation');
 const notifications = require('./modules/notifications');
 const randomCryptoString = require('./modules/random-crypto-string');
 
