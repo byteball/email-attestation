@@ -45,7 +45,7 @@ CREATE TABLE verification_emails (
 	result TINYINT NULL, -- 1 success, 0 failure, NULL pending or abandoned
 	result_date TIMESTAMP NULL,
 	creation_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (transaction_id, user_email),
+	PRIMARY KEY (transaction_id),
 	FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
 );
 CREATE INDEX byVerificationEmailIsSent ON verification_emails(is_sent);
