@@ -143,6 +143,10 @@ exports.codeConfirmedEmailInAttestation = (email) => {
 	return `Your email address ${email} is now confirmed. Posting an atestation record, please wait.`;
 };
 
+exports.switchToSingleAddress = () => {
+	return "Make sure you are in a single-address wallet, otherwise switch to a single-address wallet or create one and send me your address before paying.";
+};
+
 exports.alreadyAttested = (attestationDate) => {
 	return `You were already attested at ${attestationDate} UTC. Attest [again](command: again)?`;
 };

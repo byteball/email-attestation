@@ -222,16 +222,18 @@ function checkPayment(row, onDone) {
 		return onDone(text + '\n\n' + texts.pleasePay(row.receiving_address, row.price));
 	}
 
+	function resetUserAddress(){
+		db.query("UPDATE users SET user_address=NULL WHERE device_address=?", [row.device_address]);
+	}
+	
 	db.query("SELECT address FROM unit_authors WHERE unit=?", [row.unit], (author_rows) => {
-		if (author_rows.length !== 1) {
-			return onDone(
-				texts.receivedPaymentFromMultipleAddresses() + '\n\n' + texts.pleasePay(row.receiving_address, row.price)
-			);
+		if (author_rows.length !== 1){
+			resetUserAddress();
+			return onDone("Received a payment but looks like it was not sent from a single-address wallet.  "+texts.switchToSingleAddress());
 		}
-		if (author_rows[0].address !== row.user_address) {
-			return onDone(
-				texts.receivedPaymentNotFromExpectedAddress(row.user_address) + `\n\n` + texts.pleasePay(row.receiving_address, row.price)
-			);
+		if (author_rows[0].address !== row.user_address){
+			resetUserAddress();
+			return onDone("Received a payment but it was not sent from the expected address "+row.user_address+".  "+texts.switchToSingleAddress());
 		}
 		onDone();
 	});
