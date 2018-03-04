@@ -74,9 +74,9 @@ exports.privateChosen = () => {
 	].join('');
 };
 
-exports.publicChosen = () => {
+exports.publicChosen = (email) => {
 	return [
-		"Your email address will be posted into the public database and will be visible to everyone.  You cannot remove it later.\n\n",
+		"Your email address "+email+" will be posted into the public database and will be visible to everyone.  You cannot remove it later.\n\n",
 		"Click [private](command:private) now if you changed your mind."
 	].join('');
 };
@@ -116,7 +116,7 @@ exports.wrongVerificationCode = (leftNumberOfAttempts) => {
 exports.emailWasSent = (emailAddress) => {
 	return [
 		`A verification code was sent to ${emailAddress}. Please enter the verification code here.\n`,
-		"If you did't receive the email, check your spam folder, and if you don't find it there, click [send email again](command:send email again)."
+		"If you didn't receive the email, check your spam folder, and if you don't find it there, click [send email again](command:send email again)."
 	].join('');
 };
 

@@ -371,7 +371,7 @@ function respond (from_address, text, response = '') {
 							WHERE device_address=? AND user_address=? AND user_email=?`,
 							[post_publicly, from_address, userInfo.user_address, userInfo.user_email]
 						);
-						response += (text === "private") ? texts.privateChosen() : texts.publicChosen();
+						response += (text === "private") ? texts.privateChosen() : texts.publicChosen(userInfo.user_email);
 					}
 
 					if (post_publicly === null) {
@@ -383,7 +383,7 @@ function respond (from_address, text, response = '') {
 							from_address,
 							'text',
 							(response ? response + '\n\n' : '') + texts.pleasePay(receiving_address, price) + '\n\n' +
-							((post_publicly === 0) ? texts.privateChosen() : texts.publicChosen())
+							((post_publicly === 0) ? texts.privateChosen() : texts.publicChosen(userInfo.user_email))
 						);
 					}
 
@@ -459,7 +459,7 @@ function respond (from_address, text, response = '') {
 											`SELECT
 												payment_unit,
 												post_publicly,
-												code, result, number_of_attempts
+												code, result, number_of_attempts, user_email
 											FROM transactions
 											JOIN receiving_addresses USING(receiving_address)
 											LEFT JOIN verification_emails USING(transaction_id, user_email)
