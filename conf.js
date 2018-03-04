@@ -8,8 +8,8 @@ exports.bLight = false;
 exports.storage = 'sqlite';
 
 // TOR is recommended. If you don't run TOR, please comment the next two lines
-//exports.socksHost = '127.0.0.1';
-//exports.socksPort = 9050;
+exports.socksHost = '127.0.0.1';
+exports.socksPort = 9050;
 
 exports.hub = 'byteball.org/bb';
 exports.deviceName = 'Email attestation bot';
@@ -35,13 +35,13 @@ exports.bRunWitness = false;
 exports.THRESHOLD_DISTANCE = 20;
 exports.MIN_AVAILABLE_WITNESSINGS = 100;
 
-exports.priceInBytes = 5000;
-exports.rewardInUSD = 0.001;
-exports.referralRewardInUSD = 0.001;
+exports.priceInBytes = 500000;
+exports.rewardInUSD = 10;
+exports.referralRewardInUSD = 10;
 
 exports.objRewardWhiteListEmails = {
-	'@harvard.edu': /@harvard\.edu/,
-	'@gmail.com': /@gmail\.com/,
+	'@harvard.edu': /@harvard\.edu$/,
+	'@eesti.ee': /[a-z-]+\.[a-z-]+[\d.]*@eesti\.ee$/,
 };
 
 exports.MAX_REFERRAL_DEPTH = 5;
