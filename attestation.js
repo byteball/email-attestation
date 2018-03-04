@@ -475,158 +475,154 @@ function respond (from_address, text, response = '') {
 												/**
 												 * if user still did not enter correct verification code
 												 */
-												if (row.result === null) {
 
+												/**
+												 * if user enters correct verification code
+												 */
+												if (text === row.code) {
+
+													return db.query(
+														`UPDATE verification_emails 
+														SET result=1, result_date=${db.getNow()}
+														WHERE transaction_id=? AND user_email=?`,
+														[transaction_id, userInfo.user_email],
+														() => {
+															unlock(false);
+
+															device.sendMessageToDevice(
+																from_address,
+																'text',
+																(response ? response + '\n\n' : '') + texts.codeConfirmedEmailInAttestation(userInfo.user_email)
+															);
+
+															db.query(
+																`INSERT ${db.getIgnore()} INTO attestation_units 
+																(transaction_id) 
+																VALUES (?)`,
+																[transaction_id],
+																() => {
+
+																	let	[attestation, src_profile] = emailAttestation.getAttestationPayloadAndSrcProfile(
+																		userInfo.user_address,
+																		userInfo.user_email,
+																		row.post_publicly
+																	);
+
+																	emailAttestation.postAndWriteAttestation(
+																		transaction_id,
+																		emailAttestation.emailAttestorAddress,
+																		attestation,
+																		src_profile,
+																	);
+
+																	if (checkIsEmailQualifiedForReward(userInfo.user_email) && conf.rewardInUSD) {
+																		let rewardInBytes = conversion.getPriceInBytes(conf.rewardInUSD);
+																		db.query(
+																			`INSERT ${db.getIgnore()} INTO reward_units
+																			(transaction_id, user_address, user_email, user_id, reward)
+																			VALUES (?,?,?,?,?)`,
+																			[transaction_id, userInfo.user_address, userInfo.user_email, attestation.profile.user_id, rewardInBytes],
+																			(res) => {
+																				console.error(`reward_units insertId: ${res.insertId}, affectedRows: ${res.affectedRows}`);
+																				if (!res.affectedRows) {
+																					return console.log(`duplicate user_address or user_id: ${userInfo.user_address}, ${attestation.profile.user_id}`);
+																				}
+
+																				device.sendMessageToDevice(from_address, 'text', texts.attestedSuccessFirstTimeBonus(rewardInBytes));
+																				reward.sendAndWriteReward('attestation', transaction_id);
+
+																				if (conf.referralRewardInUSD) {
+																					let referralRewardInBytes = conversion.getPriceInBytes(conf.referralRewardInUSD);
+																					reward.findReferrer(row.payment_unit, (referring_user_id, referring_user_address, referring_user_device_address) => {
+																						if (!referring_user_address) {
+																							// console.error("no referring user for " + row.user_address);
+																							return console.log("no referring user for " + userInfo.user_address);
+																						}
+
+																						db.query(
+																							`INSERT ${db.getIgnore()} INTO referral_reward_units
+																							(transaction_id, user_address, user_id, new_user_address, new_user_id, reward)
+																							VALUES (?, ?,?, ?,?, ?)`,
+																							[transaction_id,
+																								referring_user_address, referring_user_id,
+																								userInfo.user_address, attestation.profile.user_id,
+																								referralRewardInBytes],
+																							(res) => {
+																								console.log(`referral_reward_units insertId: ${res.insertId}, affectedRows: ${res.affectedRows}`);
+																								if (!res.affectedRows) {
+																									return notifications.notifyAdmin(
+																										"duplicate referral reward",
+																										`referral reward for new user ${userInfo.user_address} ${attestation.profile.user_id} already written`
+																									);
+																								}
+
+																								device.sendMessageToDevice(referring_user_device_address, 'text', texts.referredUserBonus(conf.referralRewardInBytes));
+																								reward.sendAndWriteReward('referral', transaction_id);
+																							}
+																						);
+																					});
+																				} // if conf.referralRewardInBytes
+
+																			}
+																		);
+																	} // if conf.rewardInBytes
+
+																}
+															);
+
+														}
+													);
+
+												} else {
 													/**
-													 * if user enters correct verification code
+													 * if user enters wrong verification code
 													 */
-													if (text === row.code) {
+													let currNumberAttempts = Number(row.number_of_attempts) + 1;
+													let leftNumberAttempts = conf.MAX_ATTEMPTS - currNumberAttempts;
 
+													response = (response ? response + '\n\n' : '') + texts.wrongVerificationCode(leftNumberAttempts);
+
+													if (leftNumberAttempts > 0) {
 														return db.query(
 															`UPDATE verification_emails 
-															SET result=1, result_date=${db.getNow()}
-															WHERE transaction_id=? AND user_email=?`,
-															[transaction_id, userInfo.user_email],
+															SET number_of_attempts=? 
+															WHERE transaction_id=?`,
+															[currNumberAttempts, transaction_id],
 															() => {
 																unlock(false);
 
 																device.sendMessageToDevice(
 																	from_address,
 																	'text',
-																	(response ? response + '\n\n' : '') + texts.codeConfirmedEmailInAttestation(userInfo.user_email)
-																);
-
-																db.query(
-																	`INSERT ${db.getIgnore()} INTO attestation_units 
-																	(transaction_id) 
-																	VALUES (?)`,
-																	[transaction_id],
-																	() => {
-
-																		let	[attestation, src_profile] = emailAttestation.getAttestationPayloadAndSrcProfile(
-																			userInfo.user_address,
-																			userInfo.user_email,
-																			row.post_publicly
-																		);
-
-																		emailAttestation.postAndWriteAttestation(
-																			transaction_id,
-																			emailAttestation.emailAttestorAddress,
-																			attestation,
-																			src_profile,
-																		);
-
-																		if (checkIsEmailQualifiedForReward(userInfo.user_email) && conf.rewardInUSD) {
-																			let rewardInBytes = conversion.getPriceInBytes(conf.rewardInUSD);
-																			db.query(
-																				`INSERT ${db.getIgnore()} INTO reward_units
-																				(transaction_id, user_address, user_email, user_id, reward)
-																				VALUES (?,?,?,?,?)`,
-																				[transaction_id, userInfo.user_address, userInfo.user_email, attestation.profile.user_id, rewardInBytes],
-																				(res) => {
-																					console.error(`reward_units insertId: ${res.insertId}, affectedRows: ${res.affectedRows}`);
-																					if (!res.affectedRows) {
-																						return console.log(`duplicate user_address or user_id: ${userInfo.user_address}, ${attestation.profile.user_id}`);
-																					}
-
-																					device.sendMessageToDevice(from_address, 'text', texts.attestedSuccessFirstTimeBonus(rewardInBytes));
-																					reward.sendAndWriteReward('attestation', transaction_id);
-
-																					if (conf.referralRewardInUSD) {
-																						let referralRewardInBytes = conversion.getPriceInBytes(conf.referralRewardInUSD);
-																						reward.findReferrer(row.payment_unit, (referring_user_id, referring_user_address, referring_user_device_address) => {
-																							if (!referring_user_address) {
-																								// console.error("no referring user for " + row.user_address);
-																								return console.log("no referring user for " + userInfo.user_address);
-																							}
-
-																							db.query(
-																								`INSERT ${db.getIgnore()} INTO referral_reward_units
-																								(transaction_id, user_address, user_id, new_user_address, new_user_id, reward)
-																								VALUES (?, ?,?, ?,?, ?)`,
-																								[transaction_id,
-																									referring_user_address, referring_user_id,
-																									userInfo.user_address, attestation.profile.user_id,
-																									referralRewardInBytes],
-																								(res) => {
-																									console.log(`referral_reward_units insertId: ${res.insertId}, affectedRows: ${res.affectedRows}`);
-																									if (!res.affectedRows) {
-																										return notifications.notifyAdmin(
-																											"duplicate referral reward",
-																											`referral reward for new user ${userInfo.user_address} ${attestation.profile.user_id} already written`
-																										);
-																									}
-
-																									device.sendMessageToDevice(referring_user_device_address, 'text', texts.referredUserBonus(conf.referralRewardInBytes));
-																									reward.sendAndWriteReward('referral', transaction_id);
-																								}
-																							);
-																						});
-																					} // if conf.referralRewardInBytes
-
-																				}
-																			);
-																		} // if conf.rewardInBytes
-
-																	}
+																	(response ? response + '\n\n' : '') + texts.emailWasSent(userInfo.user_email)
 																);
 
 															}
 														);
-
 													} else {
 														/**
-														 * if user enters wrong verification code
+														 * no more chance, attestation is failed
 														 */
-														let currNumberAttempts = Number(row.number_of_attempts) + 1;
-														let leftNumberAttempts = conf.MAX_ATTEMPTS - currNumberAttempts;
+														return db.query(
+															`UPDATE verification_emails 
+															SET number_of_attempts=?, result=0, result_date=${db.getNow()}
+															WHERE transaction_id=?`,
+															[currNumberAttempts, transaction_id],
+															() => {
+																unlock(false);
 
-														response = (response ? response + '\n\n' : '') + texts.wrongVerificationCode(leftNumberAttempts);
+																device.sendMessageToDevice(
+																	from_address,
+																	'text',
+																	(response ? response + '\n\n' : '') + texts.currentAttestationFailed()
+																);
 
-														if (leftNumberAttempts > 0) {
-															return db.query(
-																`UPDATE verification_emails 
-																SET number_of_attempts=? 
-																WHERE transaction_id=?`,
-																[currNumberAttempts, transaction_id],
-																() => {
-																	unlock(false);
+															}
+														);
+													} // no more chance, attestation is failed
 
-																	device.sendMessageToDevice(
-																		from_address,
-																		'text',
-																		(response ? response + '\n\n' : '') + texts.emailWasSent(userInfo.user_email)
-																	);
+												} // user enters wrong verification code
 
-																}
-															);
-														} else {
-															/**
-															 * no more chance, attestation is failed
-															 */
-															return db.query(
-																`UPDATE verification_emails 
-																SET number_of_attempts=?, result=0, result_date=${db.getNow()}
-																WHERE transaction_id=?`,
-																[currNumberAttempts, transaction_id],
-																() => {
-																	unlock(false);
-
-																	device.sendMessageToDevice(
-																		from_address,
-																		'text',
-																		(response ? response + '\n\n' : '') + texts.currentAttestationFailed()
-																	);
-
-																}
-															);
-														} // no more chance, attestation is failed
-
-													} // user enters wrong verification code
-
-												} else {
-													unlock(true);
-												}
 											});
 
 									}, (bIsNeededNextCall) => {
