@@ -3,7 +3,7 @@
 const conf = require('byteballcore/conf');
 const db = require('byteballcore/db');
 const notifications = require('./notifications');
-const attestation = require('./attestation');
+const emailAttestation = require('./email_attestation');
 
 exports.distributionAddress = null;
 
@@ -133,7 +133,7 @@ function findReferrer(payment_unit, handleReferrer) {
 			WHERE address IN(${arrAddresses.map(db.escape).join(', ')}) 
 				AND +attestor_address=? 
 				AND transactions.payment_unit!=?`,
-			[attestation.emailAttestorAddress, payment_unit],
+			[emailAttestation.emailAttestorAddress, payment_unit],
 			(rows) => {
 				if (rows.length === 0){
 					console.log("no referrers for payment unit "+payment_unit);
