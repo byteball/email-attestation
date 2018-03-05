@@ -262,7 +262,7 @@ function handleTransactionsBecameStable(arrUnits) {
 						/**
 						 * create and send verification code to attestation email
 						 */
-						const verificationCode = randomCryptoString.generateByLengthSync(6);
+						const verificationCode = randomCryptoString.generateByLengthSync(10);
 
 						db.query(
 							`INSERT INTO verification_emails 
@@ -425,11 +425,11 @@ function respond (from_address, text, response = '') {
 								);
 							}
 
-							let verification_email_result = row.result;
+							let email_verification_result = row.result;
 							/**
 							 * if user still did not enter correct verification code
 							 */
-							if (verification_email_result === null) {
+							if (email_verification_result === null) {
 
 								/**
 								 * user wants to receive email again
@@ -631,7 +631,7 @@ function respond (from_address, text, response = '') {
 									}); // mutex.lock userInfo.user_address
 
 								}
-							} // if verification_email_result === null
+							} // if email_verification_result === null
 
 							callLastScenarioChecks();
 
@@ -639,7 +639,7 @@ function respond (from_address, text, response = '') {
 								/**
 								 * previous attestation was failed
 								 */
-								if (verification_email_result === 0) {
+								if (email_verification_result === 0) {
 									return device.sendMessageToDevice(
 										from_address,
 										'text',
