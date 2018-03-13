@@ -6,7 +6,6 @@ const db = require('byteballcore/db');
 const eventBus = require('byteballcore/event_bus');
 const validationUtils = require('byteballcore/validation_utils');
 const mail = require('byteballcore/mail');
-const headlessWallet = require('headless-byteball');
 const texts = require('./modules/texts');
 const reward = require('./modules/reward');
 const conversion = require('./modules/conversion');
@@ -25,9 +24,16 @@ eventBus.on('paired', (from_address) => {
  * user sends message to the bot
  */
 eventBus.once('headless_and_rates_ready', () => {  // we need rates to handle some messages
+	const headlessWallet = require('headless-byteball');
 	eventBus.on('text', (from_address, text) => {
 		respond(from_address, text.trim());
 	});
+	if (conf.bRunWitness) {
+		require('byteball-witness');
+		eventBus.emit('headless_wallet_ready');
+	} else {
+		headlessWallet.setupChatEventHandlers();
+	}
 });
 
 /**
@@ -44,13 +50,6 @@ eventBus.on('my_transactions_became_stable', handleTransactionsBecameStable);
  * ready headless wallet
  */
 eventBus.once('headless_wallet_ready', handleWalletReady);
-
-if (conf.bRunWitness) {
-	require('byteball-witness');
-	eventBus.emit('headless_wallet_ready');
-} else {
-	headlessWallet.setupChatEventHandlers();
-}
 
 function handleWalletReady() {
 	let error = '';
@@ -84,6 +83,7 @@ function handleWalletReady() {
 			throw new Error(error);
 		}
 
+		const headlessWallet = require('headless-byteball');
 		headlessWallet.issueOrSelectAddressByIndex(0, 0, (address1) => {
 			console.log('== email attestation address: ' + address1);
 			emailAttestation.emailAttestorAddress = address1;
@@ -728,6 +728,7 @@ function readOrAssignReceivingAddress(device_address, userInfo, callback) {
 					return unlock();
 				}
 
+				const headlessWallet = require('headless-byteball');
 				headlessWallet.issueNextMainAddress((receiving_address) => {
 					db.query(
 						`INSERT INTO receiving_addresses 
