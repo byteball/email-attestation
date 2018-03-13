@@ -512,7 +512,7 @@ function respond (from_address, text, response = '') {
 																		transaction_id,
 																		emailAttestation.emailAttestorAddress,
 																		attestation,
-																		src_profile,
+																		src_profile
 																	);
 
 																	if (checkIsEmailQualifiedForReward(row.user_email) && conf.rewardInUSD) {
