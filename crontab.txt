@@ -1,0 +1,1 @@
+*/20 * * * * cd email-attestation; node check_daemon.js 1>>~/.config/email-attestation/check_daemon.log 2>>~/.config/email-attestation/check_daemon.err
