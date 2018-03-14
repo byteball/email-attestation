@@ -35,7 +35,7 @@ exports.weHaveReferralProgram = () => {
 		"if you send Bytes from your attested address to a new user who is not attested yet, " +
 		"and he/she uses those Bytes to pay for a successful attestation, " +
 		`and his/her email is on one of the following domains:\n${arrWhitelistEmails.join(',\n')},\n` +
-		`you receive a $${conf.referralRewardInUSD.toLocaleString([], {minimumFractionDigits: 2})} reward in Bytes.`
+		`you receive a $${conf.referralRewardInUSD.toLocaleString([], {minimumFractionDigits: 2})} reward in Bytes.\n\nIf you would like to attest another email address, just type it here.`
 	].join('');
 };
 
