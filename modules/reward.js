@@ -110,7 +110,7 @@ function findReferrer(payment_unit, user_address, handleReferrer) {
 			(rows) => {
 				rows.forEach((row) => {
 					if (row.address === user_address) // no self-refferrers
-						continue;
+						return;
 					if (!assocMcisByAddress[row.address] || assocMcisByAddress[row.address] < row.main_chain_index)
 						assocMcisByAddress[row.address] = row.main_chain_index;
 				});
