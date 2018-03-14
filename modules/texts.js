@@ -167,13 +167,13 @@ exports.verificationEmailSubject = () => {
 exports.verificationEmailText = (verificationCode) => {
 	return [
 		`Your verification code is ${verificationCode}\n`,
-		`Please enter this code in chat with "${conf.deviceName}"`,
+		`Please enter this code in chat with ${conf.deviceName}`,
 	].join('');
 };
 exports.verificationEmailHtml = (verificationCode) => {
 	return [
 		`<p>Your verification code is <b>${verificationCode}</b></p>`,
-		`<p>Please enter this code in chat with "${conf.deviceName}"</p>`,
+		`<p>Please enter this code in chat with ${conf.deviceName}</p>`,
 		'<p style="font-size: 13px; color: #727272; margin-top: 15px;">-------',
 		'<br>Please do not reply to this email.',
 		'</p>'
