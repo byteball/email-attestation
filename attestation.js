@@ -72,7 +72,7 @@ function handleWalletReady() {
 		if (conf.bUseSmtp && (!conf.smtpHost || !conf.smtpUser || !conf.smtpPassword)) {
 			error += texts.errorConfigSmtp();
 		}
-		if (!conf.admin_email || !conf.from_email) {
+		if (!conf.admin_email || !conf.from_email || !conf.attestation_from_email) {
 			error += texts.errorConfigEmail();
 		}
 		if (!conf.salt) {
@@ -284,7 +284,7 @@ function handleTransactionsBecameStable(arrUnits) {
 function sendVerificationCodeToEmailAndMarkIsSent(user_email, code, transaction_id, device_address) {
 	let device = require('byteballcore/device.js');
 	mail.sendmail({
-		from: `${conf.from_email_name ? conf.from_email_name + ' ' : ''}<${conf.from_email}>`,
+		from: `${conf.attestation_from_name ? conf.attestation_from_name + ' ' : ''}<${conf.attestation_from_email}>`,
 		to: user_email,
 		subject: texts.verificationEmailSubject(),
 		body: texts.verificationEmailText(code),

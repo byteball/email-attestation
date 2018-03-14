@@ -192,7 +192,7 @@ exports.errorConfigSmtp = () => {
 };
 
 exports.errorConfigEmail = () => {
-	return `please specify admin_email and from_email in your ${desktopApp.getAppDataDir()}/conf.json\n`;
+	return `please specify admin_email, from_email, and attestation_from_email in your ${desktopApp.getAppDataDir()}/conf.json\n`;
 };
 
 exports.errorConfigSalt = () => {
