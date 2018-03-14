@@ -90,7 +90,7 @@ function retrySendingRewards() {
 	retrySendingRewardsOfType('referral');
 }
 
-function findReferrer(payment_unit, handleReferrer) {
+function findReferrer(payment_unit, user_address, handleReferrer) {
 	let assocMcisByAddress = {};
 	let depth = 0;
 
@@ -109,6 +109,8 @@ function findReferrer(payment_unit, handleReferrer) {
 			[arrUnits],
 			(rows) => {
 				rows.forEach((row) => {
+					if (row.address === user_address) // no self-refferrers
+						continue;
 					if (!assocMcisByAddress[row.address] || assocMcisByAddress[row.address] < row.main_chain_index)
 						assocMcisByAddress[row.address] = row.main_chain_index;
 				});
@@ -121,6 +123,8 @@ function findReferrer(payment_unit, handleReferrer) {
 	// the referrer doesn't have to have a whitelisted email
 	function selectReferrer() {
 		let arrAddresses = Object.keys(assocMcisByAddress);
+		if (arrAddresses.length === 0)
+			return handleReferrer();
 		console.log('ancestor addresses: '+arrAddresses.join(', '));
 		db.query(
 			`SELECT 
