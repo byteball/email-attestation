@@ -556,12 +556,12 @@ function respond (from_address, text, response = '') {
 																									);
 																								}
 
-																								device.sendMessageToDevice(referring_user_device_address, 'text', texts.referredUserBonus(conf.referralRewardInBytes));
+																								device.sendMessageToDevice(referring_user_device_address, 'text', texts.referredUserBonus(referralRewardInBytes));
 																								reward.sendAndWriteReward('referral', transaction_id);
 																							}
 																						);
 																					});
-																				} // if conf.referralRewardInBytes
+																				} // if conf.referralRewardInUSD
 
 																			}
 																		);
