@@ -92,8 +92,8 @@ function handleWalletReady() {
 				console.log('== distribution address: ' + address2);
 				reward.distributionAddress = address2;
 
-				setInterval(emailAttestation.retryPostingAttestations, 10*1000);
-				setInterval(reward.retrySendingRewards, 10*1000);
+				setInterval(emailAttestation.retryPostingAttestations, 60*1000);
+				setInterval(reward.retrySendingRewards, 60*1000);
 				setInterval(retrySendingEmails, 60*1000);
 				setInterval(moveFundsToAttestorAddresses, 60*1000);
 			});
