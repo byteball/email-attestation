@@ -41,7 +41,7 @@ exports.referralRewardInUSD = 10;
 
 exports.objRewardWhiteListEmails = {
 	'@harvard.edu': /^[a-z\d-_.]+@harvard\.edu$/i,
-	'@eesti.ee': /^(\.?[a-z-]+)+(\.[a-z-]+)+\.?[\d]*@eesti\.ee$/i,
+	'@eesti.ee': /^(\.?[a-z-]+)+(\.[a-z-]+)+[_.]?\d*@eesti\.ee$/i,
 };
 
 exports.MAX_REFERRAL_DEPTH = 5;

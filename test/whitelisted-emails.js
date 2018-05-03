@@ -34,8 +34,8 @@ checkIsEmailQualifiedForReward('mikk.martin.tamm@eesti.ee', '@eesti.ee', true); 
 checkIsEmailQualifiedForReward('mikk-martin.tamm@eesti.ee', '@eesti.ee', true); // firstname with the dash
 checkIsEmailQualifiedForReward('mikk.martin.juku.tamm@eesti.ee', '@eesti.ee', true); // multiple firstnames
 checkIsEmailQualifiedForReward('mikk.tamm-kaasik@eesti.ee', '@eesti.ee', true); // lastname with the dash
-checkIsEmailQualifiedForReward('mikk.tamm.2@eesti.ee', '@eesti.ee', true); // when namesake got the address first
+checkIsEmailQualifiedForReward('mikk.tamm.2@eesti.ee', '@eesti.ee', true); // alternative address with sequential number
+checkIsEmailQualifiedForReward('mikk.tamm_1234@eesti.ee', '@eesti.ee', true); // alternative address with non-sequential number
 checkIsEmailQualifiedForReward('mi_kk.ta_mm@eesti.ee', '@eesti.ee', false); // there shouldn't be underscores in names
-checkIsEmailQualifiedForReward('mikk.tamm_0001@eesti.ee', '@eesti.ee', false); // extra alternative address for those who have namesake
 checkIsEmailQualifiedForReward('tamm@eesti.ee', '@eesti.ee', false); // should have both firstname and lastname
-checkIsEmailQualifiedForReward('123567890@eesti.ee', '@eesti.ee', false); // government and muncipalities can send to these extra alternative adresses
+checkIsEmailQualifiedForReward('123567890@eesti.ee', '@eesti.ee', false); // for government and muncipalities use only
