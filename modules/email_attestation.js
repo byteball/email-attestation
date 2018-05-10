@@ -7,8 +7,8 @@ const notifications = require('./notifications');
 const i18nModule = require("i18n");
 const arrWhitelistEmails = Object.keys(conf.objRewardWhiteListEmails);
 
+var arrLanguages = [];
 if (conf.isMultiLingual) {
-	var arrLanguages = [];
 	for (var index in conf.languagesAvailable) {
 		arrLanguages.push(conf.languagesAvailable[index].file);
 	}

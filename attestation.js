@@ -26,8 +26,8 @@ if (conf.bUseSmtp) {
 	});
 }
 
+var arrLanguages = [];
 if (conf.isMultiLingual) {
-	var arrLanguages = [];
 	for (var index in conf.languagesAvailable) {
 		arrLanguages.push(conf.languagesAvailable[index].file);
 	}
