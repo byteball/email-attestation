@@ -64,10 +64,50 @@ const compareLineBreaks = function(filepath, locale, base) {
 
 let base_contents = fs.readFileSync('locales/en.json', 'utf8');
 let base_locale = {'data':JSON.parse(base_contents), 'linecount': base_contents.toString().split('\n').length};
+let openingBraces = 0;
+let closingBraces = 0;
+let openingDoubleBraces = 0;
+let closingDoubleBraces = 0;
+let openingTripleBraces = 0;
+let closingTripleBraces = 0;
+// compare base locale brace pairs in values
+Object.keys(base_locale['data']).forEach(function(key) {
+	openingBraces = openingBraces + base_locale['data'][key].split('{').length-1;
+	closingBraces = closingBraces + base_locale['data'][key].split('}').length-1;
+	openingDoubleBraces = openingDoubleBraces + base_locale['data'][key].split('{{').length-1;
+	closingDoubleBraces = closingDoubleBraces + base_locale['data'][key].split('}}').length-1;
+	openingTripleBraces = openingTripleBraces + base_locale['data'][key].split('{{{').length-1;
+	closingTripleBraces = closingTripleBraces + base_locale['data'][key].split('}}}').length-1;
+});
+compareBraces('base locale', openingBraces, closingBraces, 'values', 'single');
+compareBraces('base locale', openingDoubleBraces, closingDoubleBraces, 'values', 'double');
+compareBraces('base locale', openingTripleBraces, closingTripleBraces, 'values', 'triple');
+
 let translations = [];
 let localeFiles = findFiles('locales', /email-attestation_[a-z-]{5}\.json$/i, function(filepath) {
 	let contents = fs.readFileSync(filepath, 'utf8');
 	translations[filepath] = {'data': JSON.parse(contents), 'linecount': contents.toString().split('\n').length};
+});
+
+// compare translation brace pairs in values
+Object.keys(translations).forEach(function(filepath) {
+	let openingBraces = 0;
+	let closingBraces = 0;
+	let openingDoubleBraces = 0;
+	let closingDoubleBraces = 0;
+	let openingTripleBraces = 0;
+	let closingTripleBraces = 0;
+	Object.keys(translations[filepath]['data']).forEach(function(key) {
+		openingBraces = openingBraces + translations[filepath]['data'][key].split('{').length-1;
+		closingBraces = closingBraces + translations[filepath]['data'][key].split('}').length-1;
+		openingDoubleBraces = openingDoubleBraces + translations[filepath]['data'][key].split('{{').length-1;
+		closingDoubleBraces = closingDoubleBraces + translations[filepath]['data'][key].split('}}').length-1;
+		openingTripleBraces = openingTripleBraces + translations[filepath]['data'][key].split('{{{').length-1;
+		closingTripleBraces = closingTripleBraces + translations[filepath]['data'][key].split('}}}').length-1;
+	});
+	compareBraces(filepath, openingBraces, closingBraces, 'values', 'single');
+	compareBraces(filepath, openingDoubleBraces, closingDoubleBraces, 'values', 'double');
+	compareBraces(filepath, openingTripleBraces, closingTripleBraces, 'values', 'triple');
 });
 
 // compare line counts with base file
@@ -91,38 +131,6 @@ Object.keys(translations).forEach(function(filepath) {
 		key_matches += base_locale['data'].hasOwnProperty(key) ? 1 : 0;
 	});
 	compareMatchingKeys(filepath, key_matches, Object.keys(translations[filepath]['data']).length, 'translation', 'base');
-});
-
-// compare brace pairs in keys
-Object.keys(translations).forEach(function(filepath) {
-	let openingBraces = 0;
-	let closingBraces = 0;
-	let openingDoubleBraces = 0;
-	let closingDoubleBraces = 0;
-	Object.keys(translations[filepath]['data']).forEach(function(key) {
-		openingBraces = openingBraces + key.split('{').length-1;
-		closingBraces = closingBraces + key.split('}').length-1;
-		openingDoubleBraces = openingDoubleBraces + key.split('{{').length-1;
-		closingDoubleBraces = closingDoubleBraces + key.split('}}').length-1;
-	});
-	compareBraces(filepath, openingBraces, closingBraces, 'keys', 'single');
-	compareBraces(filepath, openingDoubleBraces, closingDoubleBraces, 'keys', 'double');
-});
-
-// compare braces pairs in values
-Object.keys(translations).forEach(function(filepath) {
-	let openingBraces = 0;
-	let closingBraces = 0;
-	let openingDoubleBraces = 0;
-	let closingDoubleBraces = 0;
-	Object.keys(translations[filepath]['data']).forEach(function(key) {
-		openingBraces = openingBraces + translations[filepath]['data'][key].split('{').length-1;
-		closingBraces = closingBraces + translations[filepath]['data'][key].split('}').length-1;
-		openingDoubleBraces = openingDoubleBraces + translations[filepath]['data'][key].split('{{').length-1;
-		closingDoubleBraces = closingDoubleBraces + translations[filepath]['data'][key].split('}}').length-1;
-	});
-	compareBraces(filepath, openingBraces, closingBraces, 'values', 'single');
-	compareBraces(filepath, openingDoubleBraces, closingDoubleBraces, 'values', 'double');
 });
 
 // compare line breaks with base file
