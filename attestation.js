@@ -22,6 +22,7 @@ if (conf.bUseSmtp) {
 		user: conf.smtpUser,
 		password: conf.smtpPassword,
 		host: conf.smtpHost,
+		port: typeof conf.smtpPort == 'undefined'? 465 : conf.smtpPort,
 		ssl: typeof conf.smtpSsl == 'undefined'? true : conf.smtpSsl
 	});
 }
@@ -417,6 +418,9 @@ function respond (from_address, text, response = '') {
 			if (validationUtils.isValidEmail(text)) {
 				userInfo.user_email = text.toLowerCase();
 				response += i18n.__('goingToAttestEmail', {email:userInfo.user_email});
+				if (conf.rewardInUSD) {
+					response += " " + (checkIsEmailQualifiedForReward(userInfo.user_email) ? i18n.__('whitelistedAddressForReward') : i18n.__('notWhitelistedAddressForReward'));
+				}
 				return db.query(
 					'UPDATE users SET user_email=? WHERE device_address=? AND user_address=?',
 					[userInfo.user_email, from_address, userInfo.user_address],

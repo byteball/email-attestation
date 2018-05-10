@@ -3,9 +3,10 @@ A bot that attests the user's email address
 
 # Setup
 * Run `npm install` to install node modules.
-* Run `node import-db.js` to import `db.sql` into the database.
+* Run `node import-db.js` to import `db.sql` into the database and appling database migrations.
 * Run `node attestation.js` first time to generate keys.
-* Configure `payout_address`, `admin_email`, `from_email`, `attestation_from_email` and `salt` values in newly created conf.json file.
+* Configure `admin_email`, `from_email`, `attestation_from_name`, `attestation_from_email` and `salt` values in new conf.json file (desktopApp.getAppDataDir() folder).
+* Send bytes to `== distribution address`, which is displayed in logs, it is for whitelisted domain emails and referral bonuses.
 * Run `node attestation.js` again.
 
 # Testnet

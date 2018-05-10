@@ -60,7 +60,8 @@ function sendAndWriteReward(reward_type, transaction_id) {
 						`UPDATE ${tableName} SET reward_unit=?, reward_date=${db.getNow()} WHERE transaction_id=?`,
 						[unit, transaction_id],
 						() => {
-							let device = require('byteballcore/device.js');
+							// commented out because already sending attestedSuccessFirstTimeBonus and referredUserBonus messages.
+							//let device = require('byteballcore/device.js');
 							//device.sendMessageToDevice(row.device_address, 'text', `Sent the ${reward_type} reward`);
 							unlock();
 						}

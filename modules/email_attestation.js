@@ -16,7 +16,7 @@ if (conf.isMultiLingual) {
 
 i18nModule.configure({
 	locales: arrLanguages,
-	directory: __dirname + '/locales'
+	directory: __dirname + '/../locales'
 });
 
 var i18n = {};
