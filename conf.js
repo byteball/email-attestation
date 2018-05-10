@@ -46,3 +46,12 @@ exports.objRewardWhiteListEmails = {
 
 exports.MAX_REFERRAL_DEPTH = 5;
 exports.MAX_ATTEMPTS = 5;
+
+exports.isMultiLingual = false;
+
+exports.languagesAvailable = {
+	en: {
+		name: "English",
+		file: "en"
+	}
+};

@@ -36,10 +36,10 @@ function sendAndWriteReward(reward_type, transaction_id) {
 	const tableName = (reward_type === 'referral') ? 'referral_reward_units' : 'reward_units';
 	mutex.lock(['tx-'+transaction_id], (unlock) => {
 		db.query(
-			`SELECT 
+			`SELECT
 				device_address, reward_date, reward, ${tableName}.user_address
-			FROM ${tableName} 
-			JOIN transactions USING(transaction_id) 
+			FROM ${tableName}
+			JOIN transactions USING(transaction_id)
 			JOIN receiving_addresses USING(receiving_address)
 			WHERE transaction_id=?`,
 			[transaction_id],
@@ -61,7 +61,7 @@ function sendAndWriteReward(reward_type, transaction_id) {
 						[unit, transaction_id],
 						() => {
 							let device = require('byteballcore/device.js');
-							device.sendMessageToDevice(row.device_address, 'text', `Sent the ${reward_type} reward`);
+							//device.sendMessageToDevice(row.device_address, 'text', `Sent the ${reward_type} reward`);
 							unlock();
 						}
 					);
@@ -74,8 +74,8 @@ function sendAndWriteReward(reward_type, transaction_id) {
 function retrySendingRewardsOfType(reward_type) {
 	const tableName = (reward_type === 'referral') ? 'referral_reward_units' : 'reward_units';
 	db.query(
-		`SELECT transaction_id 
-		FROM ${tableName} 
+		`SELECT transaction_id
+		FROM ${tableName}
 		WHERE reward_unit IS NULL`,
 		(rows) => {
 			rows.forEach((row) => {
@@ -99,12 +99,12 @@ function findReferrer(payment_unit, user_address, handleReferrer) {
 		// console.error('goBack', depth, arrUnits);
 		if (!arrUnits || !arrUnits.length) return handleReferrer();
 		db.query(
-			`SELECT 
-				address, src_unit, main_chain_index 
-			FROM inputs 
+			`SELECT
+				address, src_unit, main_chain_index
+			FROM inputs
 			JOIN units ON src_unit=units.unit
-			WHERE inputs.unit IN(?) 
-				AND type='transfer' 
+			WHERE inputs.unit IN(?)
+				AND type='transfer'
 				AND asset IS NULL`,
 			[arrUnits],
 			(rows) => {
@@ -127,15 +127,15 @@ function findReferrer(payment_unit, user_address, handleReferrer) {
 			return handleReferrer();
 		console.log('ancestor addresses: '+arrAddresses.join(', '));
 		db.query(
-			`SELECT 
+			`SELECT
 				address, user_address, device_address, payload, app
 			FROM attestations
 			JOIN messages USING(unit, message_index)
 			JOIN attestation_units ON unit=attestation_unit
 			JOIN transactions USING(transaction_id)
 			JOIN receiving_addresses USING(receiving_address)
-			WHERE address IN(${arrAddresses.map(db.escape).join(', ')}) 
-				AND +attestor_address=? 
+			WHERE address IN(${arrAddresses.map(db.escape).join(', ')})
+				AND +attestor_address=?
 				AND transactions.payment_unit!=?`,
 			[emailAttestation.emailAttestorAddress, payment_unit],
 			(rows) => {

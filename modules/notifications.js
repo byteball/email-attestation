@@ -11,7 +11,7 @@ if (conf.bUseSmtp) {
 		user: conf.smtpUser,
 		password: conf.smtpPassword,
 		host: conf.smtpHost,
-		ssl: true
+		ssl: typeof conf.smtpSsl == 'undefined'? true : conf.smtpSsl
 	});
 }
 

@@ -18,5 +18,16 @@ let arrTableNames = [
 	'reward_units','referral_reward_units'
 ];
 db.query("SELECT name FROM sqlite_master WHERE type='table' AND NAME IN (?)", [arrTableNames], (rows) => {
-	console.log(rows);
+	//console.log(rows);
+	if (rows.length) {
+		// check if users table has lang column
+		db.query('SELECT * FROM sqlite_master WHERE type = "table" AND `name` = "users" AND `sql` like "%lang CHAR (20) DEFAULT%"', [], (column_exits) => {
+			if (!column_exits.length) {
+				let query = 'ALTER TABLE users ADD lang CHAR (20) DEFAULT "unknown";';
+				db.query(query, [], (result) => {
+					console.log(query);
+				});
+			}
+		});
+	}
 });
