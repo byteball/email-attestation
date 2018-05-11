@@ -45,7 +45,7 @@ i18nModule.init(i18n);
  * user pairs his device with bot
  */
 eventBus.on('paired', (from_address) => {
-	respond(from_address, '', i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}));
+	respond(from_address, '');
 });
 
 /**
@@ -351,7 +351,7 @@ function sendVerificationCodeToEmailAndMarkIsSent(user_email, code, transaction_
 						WHERE transaction_id=? AND user_email=?`,
 						[1, transaction_id, user_email],
 						() => {
-							device.sendMessageToDevice(device_address, 'text', i18n.__('emailWasSent', {emailAddress:user_email, sendEmailAgain:getTxtCommandButton("send email again")}));
+							device.sendMessageToDevice(device_address, 'text', i18n.__('emailWasSent', {emailAddress:user_email, sendEmailAgain:getTxtCommandButton(i18n.__('sendEmailAgainButton'), "send email again")}));
 						}
 					);
 				});
@@ -374,7 +374,7 @@ function sendVerificationCodeToEmailAndMarkIsSent(user_email, code, transaction_
 						WHERE transaction_id=? AND user_email=?`,
 						[1, transaction_id, user_email],
 						() => {
-							device.sendMessageToDevice(device_address, 'text', i18n.__('emailWasSent', {emailAddress:user_email, sendEmailAgain:getTxtCommandButton("send email again")}));
+							device.sendMessageToDevice(device_address, 'text', i18n.__('emailWasSent', {emailAddress:user_email, sendEmailAgain:getTxtCommandButton(i18n.__('sendEmailAgainButton'), "send email again")}));
 						}
 					);
 				});
@@ -443,18 +443,21 @@ function respond (from_address, text, response = '') {
 					userInfo.lang = text.split('_')[1];
 					db.query("UPDATE users SET lang=? WHERE device_address == ? ", [userInfo.lang, from_address]);
 					i18nModule.setLocale(i18n, conf.languagesAvailable[text.split('_')[1]].file);
+					if (userAddressResponse) {
+						userAddressResponse = i18n.__('insertMyAddress');
+					}
 					device.sendMessageToDevice(from_address, 'text', "➡ " + getTxtCommandButton("Go back to language selection", "selectLanguage") + '\n\n' + i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
 				}
 
 			}
-			/*
-			 * If unknown language then we propose to select one
-			 */
+
 			if ((userInfo.lang === 'unknown' || text ==="selectLanguage") && conf.isMultiLingual) {
+				// If unknown language and multi-language turned on then we propose to select one
 				return device.sendMessageToDevice(from_address, 'text', getLanguagesSelection());
-				if (text === '') {
-					device.sendMessageToDevice(from_address, 'text', i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
-				}
+			}
+			else if (text === '') {
+				// else if paring then we start with greeting text
+				device.sendMessageToDevice(from_address, 'text', i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
 			}
 
 			if (userAddressResponse) {
@@ -477,11 +480,11 @@ function respond (from_address, text, response = '') {
 							WHERE device_address=? AND user_address=? AND user_email=?`,
 							[post_publicly, from_address, userInfo.user_address, userInfo.user_email]
 						);
-						response += (text === "private") ? i18n.__('privateChosen', {publicButton:getTxtCommandButton('public')}) : i18n.__('publicChosen', {email:userInfo.user_email, privateButton:getTxtCommandButton('private')});
+						response += (text === "private") ? i18n.__('privateChosen', {publicButton:getTxtCommandButton(i18n.__('publicButton'), 'public')}) : i18n.__('publicChosen', {email:userInfo.user_email, privateButton:getTxtCommandButton(i18n.__('privateButton'), 'private')});
 					}
 
 					if (post_publicly === null) {
-						return device.sendMessageToDevice(from_address, 'text', (response ? response + '\n\n' : '') + i18n.__('privateOrPublic', {buttons:getTxtCommandButton('private') +'\t'+ getTxtCommandButton('public')}));
+						return device.sendMessageToDevice(from_address, 'text', (response ? response + '\n\n' : '') + i18n.__('privateOrPublic', {buttons:getTxtCommandButton(i18n.__('privateButton'), 'private') +'\t'+ getTxtCommandButton(i18n.__('publicButton'), 'public')}));
 					}
 
 					if (text === 'again') {
@@ -489,7 +492,7 @@ function respond (from_address, text, response = '') {
 							from_address,
 							'text',
 							(response ? response + '\n\n' : '') + i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment',receiving_address, price)}) + '\n\n' +
-							((post_publicly === 0) ? i18n.__('privateChosen', {publicButton:getTxtCommandButton('public')}) : i18n.__('publicChosen', {email:userInfo.user_email, privateButton:getTxtCommandButton('private')}))
+							((post_publicly === 0) ? i18n.__('privateChosen', {publicButton:getTxtCommandButton(i18n.__('publicButton'), 'public')}) : i18n.__('publicChosen', {email:userInfo.user_email, privateButton:getTxtCommandButton(i18n.__('privateButton'), 'private')}))
 						);
 					}
 
@@ -513,7 +516,7 @@ function respond (from_address, text, response = '') {
 								return device.sendMessageToDevice(
 									from_address,
 									'text',
-									(response ? response + '\n\n' : '') + ((post_publicly === null) ? (i18n.__('privateOrPublic', {buttons:getTxtCommandButton('private') +'\t'+ getTxtCommandButton('public')})) : (i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', receiving_address, price)})))
+									(response ? response + '\n\n' : '') + ((post_publicly === null) ? (i18n.__('privateOrPublic', {buttons:getTxtCommandButton(i18n.__('privateButton'), 'private') +'\t'+ getTxtCommandButton(i18n.__('publicButton'), 'public')})) : (i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', receiving_address, price)})))
 
 								);
 							}
@@ -684,10 +687,17 @@ function respond (from_address, text, response = '') {
 													/**
 													 * if user enters wrong verification code
 													 */
-													let currNumberAttempts = Number(row.number_of_attempts) + 1;
+													let currNumberAttempts = Number(row.number_of_attempts);
 													let leftNumberAttempts = conf.MAX_ATTEMPTS - currNumberAttempts;
 
-													response = (response ? response + '\n\n' : '') + i18n.__('wrongVerificationCode', {attemptsLeft:leftNumberAttempts});
+													/**
+													 * increase attempts only when something was sent, but not while re-pairing at this state
+													 */
+													if (text) {
+														currNumberAttempts++;
+														leftNumberAttempts = conf.MAX_ATTEMPTS - currNumberAttempts;
+														response = (response ? response + '\n\n' : '') + i18n.__('wrongVerificationCode', {attemptsLeft:leftNumberAttempts});
+													}
 
 													if (leftNumberAttempts > 0) {
 														return db.query(
@@ -701,7 +711,7 @@ function respond (from_address, text, response = '') {
 																device.sendMessageToDevice(
 																	from_address,
 																	'text',
-																	(response ? response + '\n\n' : '') + i18n.__('emailWasSent', {emailAddress:row.user_email, sendEmailAgain:getTxtCommandButton("send email again")})
+																	(response ? response + '\n\n' : '') + i18n.__('emailWasSent', {emailAddress:row.user_email, sendEmailAgain:getTxtCommandButton(i18n.__('sendEmailAgainButton'), "send email again")})
 																);
 
 															}
@@ -721,7 +731,7 @@ function respond (from_address, text, response = '') {
 																device.sendMessageToDevice(
 																	from_address,
 																	'text',
-																	(response ? response + '\n\n' : '') + i18n.__('currentAttestationFailed', {againButton:getTxtCommandButton('again')})
+																	(response ? response + '\n\n' : '') + i18n.__('currentAttestationFailed', {againButton:getTxtCommandButton(i18n.__('againButton'), 'again')})
 																);
 
 															}
@@ -750,7 +760,7 @@ function respond (from_address, text, response = '') {
 									return device.sendMessageToDevice(
 										from_address,
 										'text',
-										(response ? response + '\n\n' : '') + i18n.__('previousAttestationFailed', {againButton:getTxtCommandButton('again')})
+										(response ? response + '\n\n' : '') + i18n.__('previousAttestationFailed', {againButton:getTxtCommandButton(i18n.__('againButton'), 'again')})
 									);
 								}
 
@@ -771,7 +781,7 @@ function respond (from_address, text, response = '') {
 								return device.sendMessageToDevice(
 									from_address,
 									'text',
-									(response ? response + '\n\n' : '') + i18n.__('alreadyAttested', {attestationDate:row.attestation_date, againButton:getTxtCommandButton('again')})
+									(response ? response + '\n\n' : '') + i18n.__('alreadyAttested', {attestationDate:row.attestation_date, againButton:getTxtCommandButton(i18n.__('againButton'), 'again')})
 								);
 							}
 

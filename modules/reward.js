@@ -4,8 +4,24 @@ const conf = require('byteballcore/conf');
 const db = require('byteballcore/db');
 const notifications = require('./notifications');
 const emailAttestation = require('./email_attestation');
+const i18nModule = require("i18n");
 
 exports.distributionAddress = null;
+
+var arrLanguages = [];
+if (conf.isMultiLingual) {
+	for (var index in conf.languagesAvailable) {
+		arrLanguages.push(conf.languagesAvailable[index].file);
+	}
+}
+
+i18nModule.configure({
+	locales: arrLanguages,
+	directory: __dirname + '/../locales'
+});
+
+var i18n = {};
+i18nModule.init(i18n);
 
 function sendReward(user_address, reward, device_address, onDone) {
 	let headlessWallet = require('headless-byteball');
@@ -60,10 +76,19 @@ function sendAndWriteReward(reward_type, transaction_id) {
 						`UPDATE ${tableName} SET reward_unit=?, reward_date=${db.getNow()} WHERE transaction_id=?`,
 						[unit, transaction_id],
 						() => {
-							// commented out because already sending attestedSuccessFirstTimeBonus and referredUserBonus messages.
-							//let device = require('byteballcore/device.js');
-							//device.sendMessageToDevice(row.device_address, 'text', `Sent the ${reward_type} reward`);
 							unlock();
+							db.query(
+								`SELECT lang FROM users WHERE device_address = ? LIMIT 1`,
+								[row.device_address],
+								(users) => {
+									let device = require('byteballcore/device.js');
+									let user = users[0];
+									if (user.lang != 'unknown') {
+										i18nModule.setLocale(i18n, conf.languagesAvailable[user.lang].file);
+									}
+									device.sendMessageToDevice(row.device_address, 'text', (reward_type === 'referral') ? i18n.__('referralRewardSent') : i18n.__('attestationRewardSent'));
+								}
+							);
 						}
 					);
 				});
