@@ -78,7 +78,7 @@ function postAndWriteAttestation(transaction_id, attestor_address, attestation_p
 						[unit, transaction_id],
 						() => {
 							db.query(
-								`SELECT lang FROM attestation_units as au JOIN attestations as a ON a.unit = au.attestation_unit	JOIN users as u ON a.address = u.user_address WHERE transaction_id = ? LIMIT 1`,
+								`SELECT lang FROM attestation_units JOIN attestations ON a.unit = attestation_units.attestation_unit JOIN users ON attestations.address = users.user_address WHERE transaction_id = ? LIMIT 1`,
 								[transaction_id],
 								(users) => {
 									let device = require('byteballcore/device.js');

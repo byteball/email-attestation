@@ -45,7 +45,7 @@ i18nModule.init(i18n);
  * user pairs his device with bot
  */
 eventBus.on('paired', (from_address) => {
-	respond(from_address, '');
+	respond(from_address, '', i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}));
 });
 
 /**
@@ -240,7 +240,7 @@ function handleNewTransactions(arrUnits) {
 								VALUES (?,?,?,?)`,
 								[row.receiving_address, row.price, row.amount, row.unit],
 								() => {
-									device.sendMessageToDevice(row.device_address, 'text', i18n.__('receivedYourPayment', {amount:row.amount/1e9}));
+									device.sendMessageToDevice(row.device_address, 'text', i18n.__('receivedYourPayment', {receivedInGBytes:row.amount/1e9}));
 								}
 							);
 
@@ -259,7 +259,7 @@ function checkPayment(row, onDone) {
 	}
 
 	if (row.amount < conf.priceInBytes) {
-		let text = i18n.__('receivedLessThanExpected', {rowAmount:row.amount, priceInBytes:conf.priceInBytes});
+		let text = i18n.__('receivedLessThanExpected', {receivedInBytes:row.amount, priceInBytes:conf.priceInBytes});
 		return onDone(text + '\n\n' + i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', row.receiving_address, conf.priceInBytes)}));
 	}
 
@@ -443,7 +443,7 @@ function respond (from_address, text, response = '') {
 					userInfo.lang = text.split('_')[1];
 					db.query("UPDATE users SET lang=? WHERE device_address == ? ", [userInfo.lang, from_address]);
 					i18nModule.setLocale(i18n, conf.languagesAvailable[text.split('_')[1]].file);
-					device.sendMessageToDevice(from_address, 'text', "➡ " + getTxtCommandButton("Go back to language selection", "selectLanguage") + '\n\n' + i18n.__('greeting', {priceInBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
+					device.sendMessageToDevice(from_address, 'text', "➡ " + getTxtCommandButton("Go back to language selection", "selectLanguage") + '\n\n' + i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
 				}
 
 			}
@@ -453,7 +453,7 @@ function respond (from_address, text, response = '') {
 			if ((userInfo.lang === 'unknown' || text ==="selectLanguage") && conf.isMultiLingual) {
 				return device.sendMessageToDevice(from_address, 'text', getLanguagesSelection());
 				if (text === '') {
-					device.sendMessageToDevice(from_address, 'text', i18n.__('greeting', {priceInBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
+					device.sendMessageToDevice(from_address, 'text', i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
 				}
 			}
 
@@ -528,7 +528,7 @@ function respond (from_address, text, response = '') {
 								return device.sendMessageToDevice(
 									from_address,
 									'text',
-									(response ? response + '\n\n' : '') + i18n.__('receivedYourPayment', {amount:row.received_amount/1e9})
+									(response ? response + '\n\n' : '') + i18n.__('receivedYourPayment', {receivedInGBytes:row.received_amount/1e9})
 								);
 							}
 
@@ -635,7 +635,7 @@ function respond (from_address, text, response = '') {
 																					return console.log(`duplicate user_address or user_id: ${userInfo.user_address}, ${attestation.profile.user_id}`);
 																				}
 
-																				device.sendMessageToDevice(from_address, 'text', i18n.__('attestedSuccessFirstTimeBonus', {rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2}), rewardInBytes:(rewardInBytes/1e9).toLocaleString([], {maximumFractionDigits: 9})}));
+																				device.sendMessageToDevice(from_address, 'text', i18n.__('attestedSuccessFirstTimeBonus', {rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2}), rewardInGBytes:(rewardInBytes/1e9).toLocaleString([], {maximumFractionDigits: 9})}));
 																				reward.sendAndWriteReward('attestation', transaction_id);
 
 																				if (conf.referralRewardInUSD) {
@@ -663,7 +663,7 @@ function respond (from_address, text, response = '') {
 																									);
 																								}
 
-																								device.sendMessageToDevice(referring_user_device_address, 'text', i18n.__('referredUserBonus', {referralRewardInUSD:conf.referralRewardInUSD.toLocaleString([], {minimumFractionDigits: 2}), referralRewardInBytes:(referralRewardInBytes/1e9).toLocaleString([], {maximumFractionDigits: 9})}));
+																								device.sendMessageToDevice(referring_user_device_address, 'text', i18n.__('referredUserBonus', {referralRewardInUSD:conf.referralRewardInUSD.toLocaleString([], {minimumFractionDigits: 2}), referralRewardInGBytes:(referralRewardInBytes/1e9).toLocaleString([], {maximumFractionDigits: 9})}));
 																								reward.sendAndWriteReward('referral', transaction_id);
 																							}
 																						);
