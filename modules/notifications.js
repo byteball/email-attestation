@@ -11,8 +11,9 @@ if (conf.bUseSmtp) {
 		user: conf.smtpUser,
 		password: conf.smtpPassword,
 		host: conf.smtpHost,
-		port: typeof conf.smtpPort == 'undefined'? 465 : conf.smtpPort,
-		ssl: typeof conf.smtpSsl == 'undefined'? true : conf.smtpSsl
+		port: typeof conf.smtpPort == 'undefined' ? null : conf.smtpPort, // custom port
+		ssl: typeof conf.smtpSsl == 'undefined' ? false : conf.smtpSsl, // ssl=true is port 465
+		tls: typeof conf.smtpTls == 'undefined' ? true : conf.smtpTls // ssl=false and tls=true is port 587, both false is port 25
 	});
 }
 
