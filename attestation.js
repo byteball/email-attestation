@@ -271,11 +271,11 @@ function checkPayment(row, onDone) {
 	db.query("SELECT address FROM unit_authors WHERE unit=?", [row.unit], (author_rows) => {
 		if (author_rows.length !== 1){
 			resetUserAddress();
-			return onDone(i18n.__('receivedPaymentFromMultipleAddresses') +" "+ i18n.__('switchToSingleAddress'));
+			return onDone(i18n.__('receivedPaymentFromMultipleAddresses') +"\n"+ i18n.__('switchToSingleAddress'));
 		}
 		if (author_rows[0].address !== row.user_address){
 			resetUserAddress();
-			return onDone(i18n.__('receivedPaymentNotFromExpectedAddress', {address:row.user_address}));
+			return onDone(i18n.__('receivedPaymentNotFromExpectedAddress', {address:row.user_address}) +"\n"+ i18n.__('switchToSingleAddress'));
 		}
 		onDone();
 	});
@@ -697,7 +697,12 @@ function respond (from_address, text, response = '') {
 													if (text) {
 														currNumberAttempts++;
 														leftNumberAttempts = conf.MAX_ATTEMPTS - currNumberAttempts;
-														response = (response ? response + '\n\n' : '') + i18n.__('wrongVerificationCode', {attemptsLeft:leftNumberAttempts});
+														if (leftNumberAttempts == 1) {
+															response = (response ? response + '\n\n' : '') + i18n.__('wrongVerificationCodeLast');
+														}
+														else {
+															response = (response ? response + '\n\n' : '') + i18n.__('wrongVerificationCode', {attemptsLeft:leftNumberAttempts});
+														}
 													}
 
 													if (leftNumberAttempts > 0) {
