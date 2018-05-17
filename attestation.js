@@ -249,7 +249,7 @@ function checkPayment(row, onDone) {
 
 	if (row.amount < conf.priceInBytes) {
 		let text = i18n.__('receivedLessThanExpected', {receivedInBytes:row.amount, priceInBytes:conf.priceInBytes});
-		return onDone(text + '\n\n' + i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', row.receiving_address, conf.priceInBytes)}));
+		return onDone(text + '\n\n' + i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', row.receiving_address, conf.priceInBytes, row.user_address)}));
 	}
 
 	function resetUserAddress(){
@@ -458,7 +458,7 @@ function respond (from_address, text, response = '') {
 						return device.sendMessageToDevice(
 							from_address,
 							'text',
-							(response ? response + '\n\n' : '') + i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment',receiving_address, price)}) + '\n\n' +
+							(response ? response + '\n\n' : '') + i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment',receiving_address, price, userInfo.user_address)}) + '\n\n' +
 							((post_publicly === 0) ? i18n.__('privateChosen', {publicButton:getTxtCommandButton(i18n.__('publicButton'), 'public')}) : i18n.__('publicChosen', {email:userInfo.user_email, privateButton:getTxtCommandButton(i18n.__('privateButton'), 'private')}))
 						);
 					}
@@ -483,7 +483,7 @@ function respond (from_address, text, response = '') {
 								return device.sendMessageToDevice(
 									from_address,
 									'text',
-									(response ? response + '\n\n' : '') + ((post_publicly === null) ? (i18n.__('privateOrPublic', {buttons:getTxtCommandButton(i18n.__('privateButton'), 'private') +'\t'+ getTxtCommandButton(i18n.__('publicButton'), 'public')})) : (i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', receiving_address, price)})))
+									(response ? response + '\n\n' : '') + ((post_publicly === null) ? (i18n.__('privateOrPublic', {buttons:getTxtCommandButton(i18n.__('privateButton'), 'private') +'\t'+ getTxtCommandButton(i18n.__('publicButton'), 'public')})) : (i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', receiving_address, price, userInfo.user_address)})))
 
 								);
 							}
@@ -782,9 +782,9 @@ function getTxtCommandButton(label, command) {
 	return text;
 }
 
-function getByteballPayButton(label, address, price) {
+function getByteballPayButton(label, address, price, user_address) {
 	var text = "";
-	text += `[${label}](byteball:${address}?amount=${price})`;
+	text += `[${label}](byteball:${address}?amount=${price}&single_address=single${user_address})`;
 	return text;
 }
 
