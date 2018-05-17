@@ -10,7 +10,6 @@
     "body-parser": "^1.18.2",
     "byteball-witness": "git+https://github.com/byteball/byteball-witness.git",
     "byteballcore": "git+https://github.com/byteball/byteballcore.git",
-    "emailjs": "^2.0.0",
     "headless-byteball": "git+https://github.com/byteball/headless-byteball.git",
     "i18n": "^0.8.3",
     "request": "2.83.0"

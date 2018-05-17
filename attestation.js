@@ -6,7 +6,6 @@ const db = require('byteballcore/db');
 const eventBus = require('byteballcore/event_bus');
 const validationUtils = require('byteballcore/validation_utils');
 const mail = require('byteballcore/mail');
-const emailjs = require('emailjs');
 const texts = require('./modules/texts');
 const reward = require('./modules/reward');
 const conversion = require('./modules/conversion');
@@ -15,18 +14,7 @@ const notifications = require('./modules/notifications');
 const randomCryptoString = require('./modules/random-crypto-string');
 const i18nModule = require("i18n");
 const arrWhitelistEmails = Object.keys(conf.objRewardWhiteListEmails);
-let server;
 
-if (conf.bUseSmtp) {
-	server = emailjs.server.connect({
-		user: conf.smtpUser,
-		password: conf.smtpPassword,
-		host: conf.smtpHost,
-		port: typeof conf.smtpPort == 'undefined' ? null : conf.smtpPort, // custom port
-		ssl: typeof conf.smtpSsl == 'undefined' ? false : conf.smtpSsl, // ssl=true is port 465
-		tls: typeof conf.smtpTls == 'undefined' ? true : conf.smtpTls // ssl=false and tls=true is port 587, both false is port 25
-	});
-}
 
 var arrLanguages = [];
 if (conf.isMultiLingual) {
@@ -335,51 +323,28 @@ function sendVerificationCodeToEmailAndMarkIsSent(user_email, code, transaction_
 				i18nModule.setLocale(i18n, conf.languagesAvailable[user.lang].file);
 			}
 
-			if (conf.bUseSmtp) {
-				server.send({
-					from: `${conf.attestation_from_name ? conf.attestation_from_name + ' ' : ''}<${conf.attestation_from_email}>`,
-					to: user_email,
-					subject: i18n.__('verificationEmailSubject'),
-					text: i18n.__('verificationEmailText', {verificationCode:code, deviceName:conf.deviceName})
-				}, function (err) {
-					if (err) {
-						console.error(err);
-						return notifications.notifyAdmin('failed to send mail', `failed to send mail to ${user_email}: ${err}`);
-					}
-					db.query(
-						`UPDATE verification_emails
-						SET is_sent=?
-						WHERE transaction_id=? AND user_email=?`,
-						[1, transaction_id, user_email],
-						() => {
-							device.sendMessageToDevice(device_address, 'text', i18n.__('emailWasSent', {emailAddress:user_email, sendEmailAgain:getTxtCommandButton(i18n.__('sendEmailAgainButton'), "send email again")}));
-						}
-					);
-				});
-			} else {
-				mail.sendmail({
-					from: `${conf.attestation_from_name ? conf.attestation_from_name + ' ' : ''}<${conf.attestation_from_email}>`,
-					to: user_email,
-					subject: i18n.__('verificationEmailSubject'),
-					body: i18n.__('verificationEmailText', {verificationCode:code, deviceName:conf.deviceName}),
-					htmlBody: i18n.__('verificationEmailHtml', {verificationCode:code, deviceName:conf.deviceName})
-				}, (err) => {
-					if (err) {
-						console.error(err);
-						return notifications.notifyAdmin('failed to send mail', `failed to send mail to ${user_email}: ${err}`);
-					}
+			mail.sendmail({
+				from: `${conf.attestation_from_name ? conf.attestation_from_name + ' ' : ''}<${conf.attestation_from_email}>`,
+				to: user_email,
+				subject: i18n.__('verificationEmailSubject'),
+				body: i18n.__('verificationEmailText', {verificationCode:code, deviceName:conf.deviceName}),
+				htmlBody: i18n.__('verificationEmailHtml', {verificationCode:code, deviceName:conf.deviceName})
+			}, (err) => {
+				if (err) {
+					console.error(err);
+					return notifications.notifyAdmin('failed to send mail', `failed to send mail to ${user_email}: ${err}`);
+				}
 
-					db.query(
-						`UPDATE verification_emails
-						SET is_sent=?
-						WHERE transaction_id=? AND user_email=?`,
-						[1, transaction_id, user_email],
-						() => {
-							device.sendMessageToDevice(device_address, 'text', i18n.__('emailWasSent', {emailAddress:user_email, sendEmailAgain:getTxtCommandButton(i18n.__('sendEmailAgainButton'), "send email again")}));
-						}
-					);
-				});
-			}
+				db.query(
+					`UPDATE verification_emails
+					SET is_sent=?
+					WHERE transaction_id=? AND user_email=?`,
+					[1, transaction_id, user_email],
+					() => {
+						device.sendMessageToDevice(device_address, 'text', i18n.__('emailWasSent', {emailAddress:user_email, sendEmailAgain:getTxtCommandButton(i18n.__('sendEmailAgainButton'), "send email again")}));
+					}
+				);
+			});
 		}
 	);
 }
