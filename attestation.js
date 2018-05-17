@@ -595,13 +595,13 @@ function respond (from_address, text, response = '') {
 																		let rewardInBytes = conversion.getPriceInBytes(conf.rewardInUSD);
 																		db.query(
 																			`INSERT ${db.getIgnore()} INTO reward_units
-																			(transaction_id, user_address, user_email, user_id, reward)
-																			VALUES (?,?,?,?,?)`,
-																			[transaction_id, userInfo.user_address, row.user_email, attestation.profile.user_id, rewardInBytes],
+																			(transaction_id, device_address, user_address, user_email, user_id, reward)
+																			VALUES (?, ?,?,?,?, ?)`,
+																			[transaction_id, from_address, userInfo.user_address, row.user_email, attestation.profile.user_id, rewardInBytes],
 																			(res) => {
 																				console.error(`reward_units insertId: ${res.insertId}, affectedRows: ${res.affectedRows}`);
 																				if (!res.affectedRows) {
-																					return console.log(`duplicate user_address or user_id: ${userInfo.user_address}, ${attestation.profile.user_id}`);
+																					return console.log(`duplicate user_address or user_id or device_address: ${userInfo.user_address}, ${attestation.profile.user_id}, ${from_address}`);
 																				}
 
 																				device.sendMessageToDevice(from_address, 'text', i18n.__('attestedSuccessFirstTimeBonus', {rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2}), rewardInGBytes:(rewardInBytes/1e9).toLocaleString([], {maximumFractionDigits: 9})}));
