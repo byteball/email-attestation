@@ -137,7 +137,7 @@ function moveFundsToAttestorAddresses() {
 		(rows) => {
 			// console.error('moveFundsToAttestorAddresses', rows);
 			if (rows.length === 0) {
-				return;
+				return console.log("nothing to move");
 			}
 
 			let arrAddresses = rows.map(row => row.receiving_address);
