@@ -403,21 +403,22 @@ function respond (from_address, text, response = '') {
 			/*
 			 * user selected a new language
 			 */
-			if (text.indexOf('selectLanguage_') == 0 && conf.isMultiLingual) {
+			if (text.indexOf('select language ') == 0 && conf.isMultiLingual) {
 
-				if (text.split('_')[1] && conf.languagesAvailable[text.split('_')[1]]) {
-					userInfo.lang = text.split('_')[1];
+				let lang = text.replace('select language ', '');
+				if (lang && conf.languagesAvailable[lang]) {
+					userInfo.lang = lang;
 					db.query("UPDATE users SET lang=? WHERE device_address == ? ", [userInfo.lang, from_address]);
-					i18nModule.setLocale(i18n, conf.languagesAvailable[text.split('_')[1]].file);
+					i18nModule.setLocale(i18n, conf.languagesAvailable[lang].file);
 					if (userAddressResponse) {
 						userAddressResponse = i18n.__('insertMyAddress');
 					}
-					device.sendMessageToDevice(from_address, 'text', "➡ " + getTxtCommandButton("Go back to language selection", "selectLanguage") + '\n\n' + i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
+					device.sendMessageToDevice(from_address, 'text', "➡ " + getTxtCommandButton("Go back to language selection", "select language") + '\n\n' + i18n.__('greeting', {priceInGBytes:conf.priceInBytes/1e9}) + (arrWhitelistEmails.length && conf.rewardInUSD ? '\n\n' + i18n.__('whiteListedReward', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), rewardInUSD:conf.rewardInUSD.toLocaleString([], {minimumFractionDigits: 2})}) : ''));
 				}
 
 			}
 
-			if ((userInfo.lang === 'unknown' || text ==="selectLanguage") && conf.isMultiLingual) {
+			if ((userInfo.lang === 'unknown' || text === "select language") && conf.isMultiLingual) {
 				// If unknown language and multi-language turned on then we propose to select one
 				return device.sendMessageToDevice(from_address, 'text', getLanguagesSelection());
 			}
@@ -768,7 +769,7 @@ function getLanguagesSelection() {
 
 	var returnedTxt = "Please select your language: ";
 	for (var index in conf.languagesAvailable) {
-		returnedTxt += "\n➡ " + getTxtCommandButton(conf.languagesAvailable[index].name, "selectLanguage_" + index);
+		returnedTxt += "\n➡ " + getTxtCommandButton(conf.languagesAvailable[index].name, "select language " + index);
 	}
 
 	return returnedTxt;
