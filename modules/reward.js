@@ -53,7 +53,7 @@ function sendAndWriteReward(reward_type, transaction_id) {
 	mutex.lock(['tx-'+transaction_id], (unlock) => {
 		db.query(
 			`SELECT
-				device_address, reward_date, reward, ${tableName}.user_address
+				receiving_addresses.device_address, reward_date, reward, ${tableName}.user_address
 			FROM ${tableName}
 			JOIN transactions USING(transaction_id)
 			JOIN receiving_addresses USING(receiving_address)
