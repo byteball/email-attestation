@@ -4,12 +4,28 @@ const conf = require('byteballcore/conf');
 const objectHash = require('byteballcore/object_hash.js');
 const db = require('byteballcore/db');
 const notifications = require('./notifications');
-const texts = require('./texts');
+const i18nModule = require("i18n");
+const arrWhitelistEmails = Object.keys(conf.objRewardWhiteListEmails);
+
+var arrLanguages = [];
+if (conf.isMultiLingual) {
+	for (var index in conf.languagesAvailable) {
+		arrLanguages.push(conf.languagesAvailable[index].file);
+	}
+}
+
+i18nModule.configure({
+	locales: arrLanguages,
+	directory: __dirname + '/../locales'
+});
+
+var i18n = {};
+i18nModule.init(i18n);
 
 function retryPostingAttestations() {
 	db.query(
-		`SELECT 
-			transaction_id, 
+		`SELECT
+			transaction_id,
 			user_address, user_email, post_publicly
 		FROM attestation_units
 		JOIN transactions USING(transaction_id)
@@ -56,29 +72,42 @@ function postAndWriteAttestation(transaction_id, attestor_address, attestation_p
 					}
 
 					db.query(
-						`UPDATE attestation_units 
+						`UPDATE attestation_units
 						SET attestation_unit=?, attestation_date=${db.getNow()}
 						WHERE transaction_id=?`,
 						[unit, transaction_id],
 						() => {
-							let device = require('byteballcore/device.js');
-							let text = "Now your email is attested, see the attestation unit: https://explorer.byteball.org/#"+unit;
+							db.query(
+								`SELECT lang FROM attestations JOIN users ON attestations.address = users.user_address WHERE attestations.unit = ? LIMIT 1`,
+								[unit],
+								(users) => {
+									let device = require('byteballcore/device.js');
+									let user = users[0];
+									let explorer = (conf.hub == 'byteball.org/bb-test' ? 'https://testnetexplorer.byteball.org/#' : 'https://explorer.byteball.org/#');
 
-							if (src_profile) {
-								let private_profile = {
-									unit: unit,
-									payload_hash: objectHash.getBase64Hash(attestation_payload),
-									src_profile: src_profile
-								};
-								let base64PrivateProfile = Buffer.from(JSON.stringify(private_profile)).toString('base64');
-								text += "\n\nClick here to save the profile in your wallet: [private profile](profile:"+base64PrivateProfile+"). " +
-									"You will be able to use it to access the services that require a proven email address.";
-							}
+									if (user.lang != 'unknown') {
+										i18nModule.setLocale(i18n, conf.languagesAvailable[user.lang].file);
+									}
+									let text = i18n.__('seeAttestationUnit', {explorer:explorer + unit});
 
-							text += "\n\n" + texts.weHaveReferralProgram();
-							device.sendMessageToDevice(row.device_address, 'text', text);
-							callback(null, unit);
-							unlock();
+									if (src_profile) {
+										let private_profile = {
+											unit: unit,
+											payload_hash: objectHash.getBase64Hash(attestation_payload),
+											src_profile: src_profile
+										};
+										let base64PrivateProfile = Buffer.from(JSON.stringify(private_profile)).toString('base64');
+										text += "\n\n" + i18n.__('savePrivateProfile', {privateProfile:'[private profile](profile:'+base64PrivateProfile+')'});
+									}
+
+									if (arrWhitelistEmails.length && conf.referralRewardInUSD) {
+										text += "\n\n" + i18n.__('weHaveReferralProgram', {arrWhitelistEmails:arrWhitelistEmails.join(',\n'), referralRewardInUSD:conf.referralRewardInUSD.toLocaleString([], {minimumFractionDigits: 2})});
+									}
+									device.sendMessageToDevice(row.device_address, 'text', text);
+									callback(null, unit);
+									unlock();
+								}
+							);
 						}
 					);
 				});

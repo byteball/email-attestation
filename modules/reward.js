@@ -4,8 +4,24 @@ const conf = require('byteballcore/conf');
 const db = require('byteballcore/db');
 const notifications = require('./notifications');
 const emailAttestation = require('./email_attestation');
+const i18nModule = require("i18n");
 
 exports.distributionAddress = null;
+
+var arrLanguages = [];
+if (conf.isMultiLingual) {
+	for (var index in conf.languagesAvailable) {
+		arrLanguages.push(conf.languagesAvailable[index].file);
+	}
+}
+
+i18nModule.configure({
+	locales: arrLanguages,
+	directory: __dirname + '/../locales'
+});
+
+var i18n = {};
+i18nModule.init(i18n);
 
 function sendReward(user_address, reward, device_address, onDone) {
 	let headlessWallet = require('headless-byteball');
@@ -36,10 +52,10 @@ function sendAndWriteReward(reward_type, transaction_id) {
 	const tableName = (reward_type === 'referral') ? 'referral_reward_units' : 'reward_units';
 	mutex.lock(['tx-'+transaction_id], (unlock) => {
 		db.query(
-			`SELECT 
+			`SELECT
 				device_address, reward_date, reward, ${tableName}.user_address
-			FROM ${tableName} 
-			JOIN transactions USING(transaction_id) 
+			FROM ${tableName}
+			JOIN transactions USING(transaction_id)
 			JOIN receiving_addresses USING(receiving_address)
 			WHERE transaction_id=?`,
 			[transaction_id],
@@ -60,9 +76,19 @@ function sendAndWriteReward(reward_type, transaction_id) {
 						`UPDATE ${tableName} SET reward_unit=?, reward_date=${db.getNow()} WHERE transaction_id=?`,
 						[unit, transaction_id],
 						() => {
-							let device = require('byteballcore/device.js');
-							device.sendMessageToDevice(row.device_address, 'text', `Sent the ${reward_type} reward`);
 							unlock();
+							db.query(
+								`SELECT lang FROM users WHERE device_address = ? LIMIT 1`,
+								[row.device_address],
+								(users) => {
+									let device = require('byteballcore/device.js');
+									let user = users[0];
+									if (user.lang != 'unknown') {
+										i18nModule.setLocale(i18n, conf.languagesAvailable[user.lang].file);
+									}
+									device.sendMessageToDevice(row.device_address, 'text', (reward_type === 'referral') ? i18n.__('referralRewardSent') : i18n.__('attestationRewardSent'));
+								}
+							);
 						}
 					);
 				});
@@ -74,8 +100,8 @@ function sendAndWriteReward(reward_type, transaction_id) {
 function retrySendingRewardsOfType(reward_type) {
 	const tableName = (reward_type === 'referral') ? 'referral_reward_units' : 'reward_units';
 	db.query(
-		`SELECT transaction_id 
-		FROM ${tableName} 
+		`SELECT transaction_id
+		FROM ${tableName}
 		WHERE reward_unit IS NULL`,
 		(rows) => {
 			rows.forEach((row) => {
@@ -99,12 +125,12 @@ function findReferrer(payment_unit, user_address, handleReferrer) {
 		// console.error('goBack', depth, arrUnits);
 		if (!arrUnits || !arrUnits.length) return handleReferrer();
 		db.query(
-			`SELECT 
-				address, src_unit, main_chain_index 
-			FROM inputs 
+			`SELECT
+				address, src_unit, main_chain_index
+			FROM inputs
 			JOIN units ON src_unit=units.unit
-			WHERE inputs.unit IN(?) 
-				AND type='transfer' 
+			WHERE inputs.unit IN(?)
+				AND type='transfer'
 				AND asset IS NULL`,
 			[arrUnits],
 			(rows) => {
@@ -127,15 +153,15 @@ function findReferrer(payment_unit, user_address, handleReferrer) {
 			return handleReferrer();
 		console.log('ancestor addresses: '+arrAddresses.join(', '));
 		db.query(
-			`SELECT 
+			`SELECT
 				address, user_address, device_address, payload, app
 			FROM attestations
 			JOIN messages USING(unit, message_index)
 			JOIN attestation_units ON unit=attestation_unit
 			JOIN transactions USING(transaction_id)
 			JOIN receiving_addresses USING(receiving_address)
-			WHERE address IN(${arrAddresses.map(db.escape).join(', ')}) 
-				AND +attestor_address=? 
+			WHERE address IN(${arrAddresses.map(db.escape).join(', ')})
+				AND +attestor_address=?
 				AND transactions.payment_unit!=?`,
 			[emailAttestation.emailAttestorAddress, payment_unit],
 			(rows) => {
