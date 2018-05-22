@@ -15,10 +15,4 @@ A bot that attests the user's email address
 * Change `socksHost` and `socksPort` values to null in conf.json file, if you are not using TOR.
 
 # Translating
-* Fork repository to your account.
-* Clone your repository to your computer.
-* Create branch for your changes.
-* Copy `en.js` to `email-attestation_[language_code].json` in `locales` folder.
-* Translate JSON object values (not keys).
-* Commit and push your changes to remote.
-* Make pull request.
+Join [Crowdin project](https://crowdin.com/project/byteball-betting-bot) to help with translations.
