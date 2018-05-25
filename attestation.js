@@ -660,7 +660,7 @@ function respond (from_address, text, response = '') {
 													/**
 													 * increase attempts only when something was sent, but not while re-pairing at this state
 													 */
-													if (text) {
+													if (text && text.indexOf('select language ') !== 0) {
 														currNumberAttempts++;
 														leftNumberAttempts = conf.MAX_ATTEMPTS - currNumberAttempts;
 														if (leftNumberAttempts == 1) {
