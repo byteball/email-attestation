@@ -51,12 +51,12 @@ exports.MAX_ATTEMPTS = 5;
 exports.isMultiLingual = true;
 
 exports.languagesAvailable = {
-	en: {
-		name: "English",
-		file: "en"
-	},
-	et: {
-		name: "Eesti",
-		file: "email-attestation_et-EE"
-	}
+	en: {name: "English", file: "en"},
+	da: {name: "Dansk", file: "email-attestation_da-DK"},
+	es: {name: "Español", file: "email-attestation_es-ES"},
+	et: {name: "Eesti", file: "email-attestation_et-EE"},
+	it: {name: "Italiano", file: "email-attestation_it-IT"},
+	ja: {name: "日本語", file: "email-attestation_ja-JP"},
+	nl: {name: "Nederlands", file: "email-attestation_nl-NL"},
+	zh: {name: "中文", file: "email-attestation_zh-CN"}
 };
