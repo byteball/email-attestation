@@ -45,12 +45,12 @@ checkIsEmailQualifiedForReward('tamm@eesti.ee', '@eesti.ee', false); // should h
 checkIsEmailQualifiedForReward('123567890@eesti.ee', '@eesti.ee', false); // for government and muncipalities use only
 
 // @usb.ve tests
-console.log('\n');
-checkIsEmailQualifiedForReward('12-12345@usb.ve', '@usb.ve', true); // valid email
-checkIsEmailQualifiedForReward('test@usb.ve', '@usb.ve', true); // valid email
-checkIsEmailQualifiedForReward('te-st.te_st@usb.ve', '@usb.ve', true); // valid email
-checkIsEmailQualifiedForReward('Test.test@USB.ve', '@usb.ve', true); // regex should be case insensitive
-checkIsEmailQualifiedForReward('test.test+test@usb.ve', '@usb.ve', false); // aliases with + sign should not work
-checkIsEmailQualifiedForReward('@usb.ve', '@usb.ve', false); // invalid email
-checkIsEmailQualifiedForReward('test@usb.ve.it', '@usb.ve', false); // invalid email
-checkIsEmailQualifiedForReward('test@gmail.com', '@usb.ve', false); // gmail addresses are not valid
+// console.log('\n');
+// checkIsEmailQualifiedForReward('12-12345@usb.ve', '@usb.ve', true); // valid email
+// checkIsEmailQualifiedForReward('test@usb.ve', '@usb.ve', true); // valid email
+// checkIsEmailQualifiedForReward('te-st.te_st@usb.ve', '@usb.ve', true); // valid email
+// checkIsEmailQualifiedForReward('Test.test@USB.ve', '@usb.ve', true); // regex should be case insensitive
+// checkIsEmailQualifiedForReward('test.test+test@usb.ve', '@usb.ve', false); // aliases with + sign should not work
+// checkIsEmailQualifiedForReward('@usb.ve', '@usb.ve', false); // invalid email
+// checkIsEmailQualifiedForReward('test@usb.ve.it', '@usb.ve', false); // invalid email
+// checkIsEmailQualifiedForReward('test@gmail.com', '@usb.ve', false); // gmail addresses are not valid
