@@ -40,7 +40,7 @@ const compareMatchingKeys = function(filepath, found, should_have, source, targe
 		console.log('\x1b[32;49mPASS\x1b[39;49m:', filepath, '- all', found, source, 'keys also found in', target);
 	}
 	catch (error) {
-		console.error('\x1b[31;49mFAIL\x1b[39;49m:', filepath, '-', source, 'has', should_have, 'keys, but', found, 'found in', target);
+		console.error('\x1b[31;49mFAIL\x1b[39;49m:', filepath, '-', source, 'has', should_have, 'keys, but only', found, 'of them found in', target);
 	}
 };
 const compareBraces = function(filepath, opening, closing, where, type) {
@@ -135,14 +135,14 @@ Object.keys(translations).forEach(function(filepath) {
 
 // compare line breaks with base file
 Object.keys(translations).forEach(function(filepath) {
-	let translation_break = 0;
+	let translation_breaks = 0;
 	let base_breaks = 0;
 	Object.keys(translations[filepath]['data']).forEach(function(key) {
-		translation_break += base_locale['data'][key].split('\n').length-1;
+		translation_breaks += translations[filepath]['data'][key].split('\n').length-1;
 	});
 	Object.keys(base_locale['data']).forEach(function(key) {
-		base_breaks += translations[filepath]['data'][key].split('\n').length-1;
+		base_breaks += base_locale['data'][key].split('\n').length-1;
 	});
-	compareLineBreaks(filepath, translation_break, base_breaks);
+	compareLineBreaks(filepath, translation_breaks, base_breaks);
 });
 //console.log(translations);
