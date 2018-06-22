@@ -59,11 +59,13 @@ exports.languagesAvailable = {
 	en: {name: "English", file: "en"},
 	da: {name: "Dansk", file: "email-attestation_da-DK"},
 	de: {name: "Deutsch", file: "email-attestation_de-DE"},
+	el: {name: "Ελληνικά", file: "email-attestation_el-GR"},
 	es: {name: "Español", file: "email-attestation_es-ES"},
 	et: {name: "Eesti", file: "email-attestation_et-EE"},
 	it: {name: "Italiano", file: "email-attestation_it-IT"},
 	ja: {name: "日本語", file: "email-attestation_ja-JP"},
 	nl: {name: "Nederlands", file: "email-attestation_nl-NL"},
 	uk: {name: "Українська", file: "email-attestation_uk-UA"},
+	vi: {name: "Tiếng Việt", file: "email-attestation_vi-VN"},
 	zh: {name: "中文", file: "email-attestation_zh-CN"}
 };
