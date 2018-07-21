@@ -332,7 +332,7 @@ function sendVerificationCodeToEmailAndMarkIsSent(user_email, code, transaction_
 			}, (err) => {
 				if (err) {
 					console.error(err);
-					return notifications.notifyAdmin('failed to send mail', `failed to send mail to ${user_email}: ${err}`);
+					notifications.notifyAdmin('failed to send mail', `failed to send mail to ${user_email}: ${err}`);
 				}
 
 				db.query(
