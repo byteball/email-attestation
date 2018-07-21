@@ -122,45 +122,59 @@ function handleWalletReady() {
 
 function moveFundsToAttestorAddresses() {
 	let network = require('byteballcore/network.js');
+	const mutex = require('byteballcore/mutex.js');
 	if (network.isCatchingUp())
 		return;
 
-	console.log('moveFundsToAttestorAddresses');
-	db.query(
-		`SELECT DISTINCT receiving_address
-		FROM receiving_addresses
-		CROSS JOIN outputs ON receiving_address = address
-		JOIN units USING(unit)
-		WHERE is_stable=1 AND is_spent=0 AND asset IS NULL
-		LIMIT ?`,
-		[constants.MAX_AUTHORS_PER_UNIT],
-		(rows) => {
-			// console.error('moveFundsToAttestorAddresses', rows);
-			if (rows.length === 0) {
-				return console.log("nothing to move");
-			}
+	mutex.lock(['moveFundsToAttestorAddresses'], unlock => {
+		console.log('moveFundsToAttestorAddresses');
+		db.query(
+			`SELECT * FROM (
+				SELECT DISTINCT receiving_address
+				FROM receiving_addresses 
+				CROSS JOIN outputs ON receiving_address = address 
+				JOIN units USING(unit)
+				WHERE is_stable=1 AND is_spent=0 AND asset IS NULL
+			) AS t
+			WHERE NOT EXISTS (
+				SELECT * FROM units CROSS JOIN unit_authors USING(unit)
+				WHERE is_stable=0 AND unit_authors.address=t.receiving_address AND definition_chash IS NOT NULL
+			)
+			LIMIT ?`,
+			[constants.MAX_AUTHORS_PER_UNIT],
+			(rows) => {
+				// console.error('moveFundsToAttestorAddresses', rows);
+				if (rows.length === 0) {
+					console.log("nothing to move");
+					return unlock();
+				}
 
-			let arrAddresses = rows.map(row => row.receiving_address);
-			// console.error(arrAddresses, emailAttestation.emailAttestorAddress);
-			let headlessWallet = require('headless-byteball');
-			headlessWallet.sendMultiPayment({
-				asset: null,
-				to_address: emailAttestation.emailAttestorAddress,
-				send_all: true,
-				paying_addresses: arrAddresses
-			}, (err, unit) => {
-				if (err) {
-					console.error("failed to move funds: " + err);
-					let balances = require('byteballcore/balances');
-					balances.readBalance(arrAddresses[0], (balance) => {
-						console.error('balance', balance);
-						notifications.notifyAdmin('failed to move funds', err + ", balance: " + JSON.stringify(balance));
-					});
-				} else
-					console.log("moved funds, unit " + unit);
-			});
-		}
-	);
+				let arrAddresses = rows.map(row => row.receiving_address);
+				// console.error(arrAddresses, emailAttestation.emailAttestorAddress);
+				let headlessWallet = require('headless-byteball');
+				headlessWallet.sendMultiPayment({
+					asset: null,
+					to_address: emailAttestation.emailAttestorAddress,
+					send_all: true,
+					paying_addresses: arrAddresses
+				}, (err, unit) => {
+					if (err) {
+						console.error("failed to move funds: " + err);
+						let balances = require('byteballcore/balances');
+						balances.readBalance(arrAddresses[0], (balance) => {
+							console.error('balance', balance);
+							notifications.notifyAdmin('failed to move funds', err + ", balance: " + JSON.stringify(balance));
+							unlock();
+						});
+					}
+					else{
+						console.log("moved funds, unit " + unit);
+						unlock();
+					}
+				});
+			}
+		);
+	});
 }
 
 function retrySendingEmails() {
