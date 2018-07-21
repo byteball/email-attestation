@@ -792,7 +792,7 @@ function checkIsEmailQualifiedForReward(email) {
 	let objRewardWhiteListEmails = conf.objRewardWhiteListEmails;
 	for (let key in objRewardWhiteListEmails) {
 		if (!objRewardWhiteListEmails.hasOwnProperty(key)) continue;
-		console.error('checkIsEmailQualifiedForReward', objRewardWhiteListEmails[key].test(email), email, objRewardWhiteListEmails[key]);
+	//	console.error('checkIsEmailQualifiedForReward', objRewardWhiteListEmails[key].test(email), email, objRewardWhiteListEmails[key]);
 		if (objRewardWhiteListEmails[key].test(email)) {
 			return true;
 		}
