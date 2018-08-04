@@ -101,7 +101,6 @@ function handleWalletReady() {
 		}
 
 		const headlessWallet = require('headless-byteball');
-		const split = require('headless-byteball/split.js');
 		headlessWallet.issueOrSelectAddressByIndex(0, 0, (address1) => {
 			console.log('== email attestation address: ' + address1);
 			emailAttestation.emailAttestorAddress = address1;
@@ -109,7 +108,6 @@ function handleWalletReady() {
 			headlessWallet.issueOrSelectAddressByIndex(0, 1, (address2) => {
 				console.log('== distribution address: ' + address2);
 				reward.distributionAddress = address2;
-				split.startCheckingAndSplittingLargestOutput(reward.distributionAddress);
 
 				setInterval(emailAttestation.retryPostingAttestations, 60*1000);
 				setInterval(reward.retrySendingRewards, 60*1000);
