@@ -63,7 +63,7 @@ const compareLineBreaks = function(filepath, locale, base) {
 };
 
 let base_contents = fs.readFileSync('locales/en.json', 'utf8');
-let base_locale = {'data':JSON.parse(base_contents), 'linecount': base_contents.toString().split('\n').length};
+let base_locale = {'data':JSON.parse(base_contents), 'linecount': base_contents.trim().toString().split('\n').length};
 let openingBraces = 0;
 let closingBraces = 0;
 let openingDoubleBraces = 0;
@@ -84,9 +84,9 @@ compareBraces('base locale', openingDoubleBraces, closingDoubleBraces, 'values',
 compareBraces('base locale', openingTripleBraces, closingTripleBraces, 'values', 'triple');
 
 let translations = [];
-let localeFiles = findFiles('locales', /email-attestation_[a-z-]{5}\.json$/i, function(filepath) {
+findFiles('locales', /email-attestation_[a-z-]{5}\.json$/i, function(filepath) {
 	let contents = fs.readFileSync(filepath, 'utf8');
-	translations[filepath] = {'data': JSON.parse(contents), 'linecount': contents.toString().split('\n').length};
+	translations[filepath] = {'data': JSON.parse(contents), 'linecount': contents.trim().toString().split('\n').length};
 });
 
 // compare translation brace pairs in values
