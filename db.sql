@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS referral_reward_units (
 );
 
 /*
+ALTER TABLE users ADD lang CHAR(20) DEFAULT "unknown";
+
 -- it is NULL because we already have records which would break uniqueness
 ALTER TABLE reward_units ADD COLUMN device_address CHAR(33) NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS reward_units_by_device_address ON reward_units(device_address);
