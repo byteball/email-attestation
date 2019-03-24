@@ -27,7 +27,7 @@
 	"wrongVerificationCodeLast": "Wrong verification code! You have one attempt left.",
 	"emailWasSent": "A verification code was sent to {{emailAddress}}. Please enter the verification code here.\nIf you didn't receive the email, check your spam folder, and if you don't find it there, click {{sendEmailAgain}}.",
 	"attestedSuccessFirstTimeBonus": "You attested your email for the first time and will receive a welcome bonus of ${{rewardInUSD}} ({{rewardInGBytes}} GB) from Obyte distribution fund.",
-	"referredUserBonus": "You referred a user who has just attested their email address and you will receive a reward of ${{referralRewardInUSD}} ({{referralRewardInGBytes}} GB) from Obyte distribution fund.\nThank you for bringing in a new Obyter, the value of the ecosystem grows with each new user!",
+	"referredUserBonus": "You referred a user who has just attested their email address and you will receive a reward of ${{referralRewardInUSD}} ({{referralRewardInGBytes}} GB) from Obyte distribution fund.\nThank you for bringing in a new user, the value of the ecosystem grows with each new user!",
 	"attestationRewardSent": "Sent the attestation reward",
 	"referralRewardSent": "Sent the referral reward",
 	"codeConfirmedEmailInAttestation": "Your email address {{email}} is now confirmed. Posting an attestation record, please wait.",
