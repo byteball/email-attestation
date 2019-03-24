@@ -1,7 +1,7 @@
 /*jslint node: true */
 'use strict';
-const conf = require('byteballcore/conf');
-const db = require('byteballcore/db');
+const conf = require('ocore/conf');
+const db = require('ocore/db');
 const notifications = require('./notifications');
 const emailAttestation = require('./email_attestation');
 const i18nModule = require("i18n");
@@ -24,7 +24,7 @@ var i18n = {};
 i18nModule.init(i18n);
 
 function sendReward(user_address, reward, device_address, onDone) {
-	let headlessWallet = require('headless-byteball');
+	let headlessWallet = require('headless-obyte');
 	headlessWallet.sendMultiPayment({
 		asset: null,
 		amount: reward,
@@ -35,7 +35,7 @@ function sendReward(user_address, reward, device_address, onDone) {
 	}, (err, unit) => {
 		if (err) {
 			console.error("failed to send reward: ", err);
-			let balances = require('byteballcore/balances');
+			let balances = require('ocore/balances');
 			balances.readBalance(exports.distributionAddress, (balance) => {
 				console.error(balance);
 				notifications.notifyAdmin('failed to send reward', err + ", balance: " + JSON.stringify(balance));
@@ -48,7 +48,7 @@ function sendReward(user_address, reward, device_address, onDone) {
 }
 
 function sendAndWriteReward(reward_type, transaction_id) {
-	const mutex = require('byteballcore/mutex.js');
+	const mutex = require('ocore/mutex.js');
 	const tableName = (reward_type === 'referral') ? 'referral_reward_units' : 'reward_units';
 	mutex.lock(['tx-'+transaction_id], (unlock) => {
 		db.query(
@@ -81,7 +81,7 @@ function sendAndWriteReward(reward_type, transaction_id) {
 								`SELECT lang FROM users WHERE device_address = ? LIMIT 1`,
 								[row.device_address],
 								(users) => {
-									let device = require('byteballcore/device.js');
+									let device = require('ocore/device.js');
 									let user = users[0];
 									if (user.lang != 'unknown') {
 										i18nModule.setLocale(i18n, conf.languagesAvailable[user.lang].file);

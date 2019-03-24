@@ -1,16 +1,16 @@
 {
   "name": "email-attestation",
   "version": "1.0.0",
-  "description": "A byteball bot for attestation of email address",
+  "description": "An Obyte bot for attestation of email address",
   "main": "attestation.js",
   "repository": "https://github.com/byteball/email-attestation.git",
   "author": "temikn <temikng@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.2",
-    "byteball-witness": "git+https://github.com/byteball/byteball-witness.git",
-    "byteballcore": "git+https://github.com/byteball/byteballcore.git",
-    "headless-byteball": "git+https://github.com/byteball/headless-byteball.git",
+    "obyte-witness": "git+https://github.com/byteball/obyte-witness.git",
+    "ocore": "git+https://github.com/byteball/ocore.git",
+    "headless-obyte": "git+https://github.com/byteball/headless-obyte.git",
     "i18n": "^0.8.3",
     "request": "2.83.0"
   },

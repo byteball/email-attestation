@@ -1,11 +1,11 @@
 /*jslint node: true */
 'use strict';
-const constants = require('byteballcore/constants.js');
-const conf = require('byteballcore/conf');
-const db = require('byteballcore/db');
-const eventBus = require('byteballcore/event_bus');
-const validationUtils = require('byteballcore/validation_utils');
-const mail = require('byteballcore/mail');
+const constants = require('ocore/constants.js');
+const conf = require('ocore/conf');
+const db = require('ocore/db');
+const eventBus = require('ocore/event_bus');
+const validationUtils = require('ocore/validation_utils');
+const mail = require('ocore/mail');
 const texts = require('./modules/texts');
 const reward = require('./modules/reward');
 const conversion = require('./modules/conversion');
@@ -41,12 +41,12 @@ eventBus.on('paired', (from_address) => {
  * user sends message to the bot
  */
 eventBus.once('headless_and_rates_ready', () => {  // we need rates to handle some messages
-	const headlessWallet = require('headless-byteball');
+	const headlessWallet = require('headless-obyte');
 	eventBus.on('text', (from_address, text) => {
 		respond(from_address, text.trim());
 	});
 	if (conf.bRunWitness) {
-		require('byteball-witness');
+		require('obyte-witness');
 		eventBus.emit('headless_wallet_ready');
 	} else {
 		headlessWallet.setupChatEventHandlers();
@@ -100,7 +100,7 @@ function handleWalletReady() {
 			throw new Error(error);
 		}
 
-		const headlessWallet = require('headless-byteball');
+		const headlessWallet = require('headless-obyte');
 		headlessWallet.issueOrSelectAddressByIndex(0, 0, (address1) => {
 			console.log('== email attestation address: ' + address1);
 			emailAttestation.emailAttestorAddress = address1;
@@ -119,8 +119,8 @@ function handleWalletReady() {
 }
 
 function moveFundsToAttestorAddresses() {
-	let network = require('byteballcore/network.js');
-	const mutex = require('byteballcore/mutex.js');
+	let network = require('ocore/network.js');
+	const mutex = require('ocore/mutex.js');
 	if (network.isCatchingUp())
 		return;
 
@@ -149,7 +149,7 @@ function moveFundsToAttestorAddresses() {
 
 				let arrAddresses = rows.map(row => row.receiving_address);
 				// console.error(arrAddresses, emailAttestation.emailAttestorAddress);
-				let headlessWallet = require('headless-byteball');
+				let headlessWallet = require('headless-obyte');
 				headlessWallet.sendMultiPayment({
 					asset: null,
 					to_address: emailAttestation.emailAttestorAddress,
@@ -158,7 +158,7 @@ function moveFundsToAttestorAddresses() {
 				}, (err, unit) => {
 					if (err) {
 						console.error("failed to move funds: " + err);
-						let balances = require('byteballcore/balances');
+						let balances = require('ocore/balances');
 						balances.readBalance(arrAddresses[0], (balance) => {
 							console.error('balance', balance);
 							notifications.notifyAdmin('failed to move funds', err + ", balance: " + JSON.stringify(balance));
@@ -194,7 +194,7 @@ function retrySendingEmails() {
 }
 
 function handleNewTransactions(arrUnits) {
-	let device = require('byteballcore/device.js');
+	let device = require('ocore/device.js');
 	db.query(
 		`SELECT
 			amount, asset, unit,
@@ -261,7 +261,7 @@ function checkPayment(row, onDone) {
 
 	if (row.amount < conf.priceInBytes) {
 		let text = i18n.__('receivedLessThanExpected', {receivedInBytes:row.amount, priceInBytes:conf.priceInBytes});
-		return onDone(text + '\n\n' + i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', row.receiving_address, conf.priceInBytes, row.user_address)}));
+		return onDone(text + '\n\n' + i18n.__('pleasePay', {payButton:getObytePayButton('attestation payment', row.receiving_address, conf.priceInBytes, row.user_address)}));
 	}
 
 	function resetUserAddress(){
@@ -282,7 +282,7 @@ function checkPayment(row, onDone) {
 }
 
 function handleTransactionsBecameStable(arrUnits) {
-	let device = require('byteballcore/device.js');
+	let device = require('ocore/device.js');
 	db.query(
 		`SELECT
 			transaction_id,
@@ -324,7 +324,7 @@ function handleTransactionsBecameStable(arrUnits) {
 }
 
 function sendVerificationCodeToEmailAndMarkIsSent(user_email, code, transaction_id, device_address) {
-	let device = require('byteballcore/device.js');
+	let device = require('ocore/device.js');
 
 	db.query(
 		`SELECT lang FROM users WHERE device_address = ? LIMIT 1`,
@@ -368,8 +368,8 @@ function sendVerificationCodeToEmailAndMarkIsSent(user_email, code, transaction_
  * @param response
  */
 function respond (from_address, text, response = '') {
-	let device = require('byteballcore/device.js');
-	const mutex = require('byteballcore/mutex.js');
+	let device = require('ocore/device.js');
+	const mutex = require('ocore/mutex.js');
 
 	readUserInfo(from_address, (userInfo) => {
 		if (userInfo.lang != 'unknown') {
@@ -470,7 +470,7 @@ function respond (from_address, text, response = '') {
 						return device.sendMessageToDevice(
 							from_address,
 							'text',
-							(response ? response + '\n\n' : '') + i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment',receiving_address, price, userInfo.user_address)}) + '\n\n' +
+							(response ? response + '\n\n' : '') + i18n.__('pleasePay', {payButton:getObytePayButton('attestation payment',receiving_address, price, userInfo.user_address)}) + '\n\n' +
 							((post_publicly === 0) ? i18n.__('privateChosen', {publicButton:getTxtCommandButton(i18n.__('publicButton'), 'public')}) : i18n.__('publicChosen', {email:userInfo.user_email, privateButton:getTxtCommandButton(i18n.__('privateButton'), 'private')}))
 						);
 					}
@@ -495,7 +495,7 @@ function respond (from_address, text, response = '') {
 								return device.sendMessageToDevice(
 									from_address,
 									'text',
-									(response ? response + '\n\n' : '') + ((post_publicly === null) ? (i18n.__('privateOrPublic', {buttons:getTxtCommandButton(i18n.__('privateButton'), 'private') +'\t'+ getTxtCommandButton(i18n.__('publicButton'), 'public')})) : (i18n.__('pleasePay', {payButton:getByteballPayButton('attestation payment', receiving_address, price, userInfo.user_address)})))
+									(response ? response + '\n\n' : '') + ((post_publicly === null) ? (i18n.__('privateOrPublic', {buttons:getTxtCommandButton(i18n.__('privateButton'), 'private') +'\t'+ getTxtCommandButton(i18n.__('publicButton'), 'public')})) : (i18n.__('pleasePay', {payButton:getObytePayButton('attestation payment', receiving_address, price, userInfo.user_address)})))
 
 								);
 							}
@@ -794,7 +794,7 @@ function getTxtCommandButton(label, command) {
 	return text;
 }
 
-function getByteballPayButton(label, address, price, user_address) {
+function getObytePayButton(label, address, price, user_address) {
 	var text = "";
 	text += `[${label}](byteball:${address}?amount=${price}&single_address=single${user_address})`;
 	return text;
@@ -837,7 +837,7 @@ function readUserInfo (device_address, callback) {
  * @param callback
  */
 function readOrAssignReceivingAddress(device_address, userInfo, callback) {
-	const mutex = require('byteballcore/mutex.js');
+	const mutex = require('ocore/mutex.js');
 	mutex.lock([device_address], (unlock) => {
 		db.query(
 			`SELECT receiving_address, post_publicly, ${db.getUnixTimestamp('last_price_date')} AS price_ts
@@ -851,7 +851,7 @@ function readOrAssignReceivingAddress(device_address, userInfo, callback) {
 					return unlock();
 				}
 
-				const headlessWallet = require('headless-byteball');
+				const headlessWallet = require('headless-obyte');
 				headlessWallet.issueNextMainAddress((receiving_address) => {
 					db.query(
 						`INSERT INTO receiving_addresses
