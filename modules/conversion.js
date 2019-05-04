@@ -37,7 +37,9 @@ function updateBittrexRates() {
 	console.log('updating bittrex');
 	const apiUri = 'https://bittrex.com/api/v1.1/public/getmarketsummaries';
 	request(apiUri, (error, response, body) => {
-		if (!error && response.statusCode === 200) {
+		if (error || response.statusCode !== 200)
+			return notifications.notifyAdmin("getting bittrex data failed", error + ", status=" + (response ? response.statusCode : '?'));
+		try {
 			let arrCoinInfos = JSON.parse(body).result;
 			arrCoinInfos.forEach(coinInfo => {
 				let price = coinInfo.Last; // number
@@ -50,11 +52,11 @@ function updateBittrexRates() {
 					GBYTE_BTC_rate = price;
 				}
 			});
-			checkAllRatesUpdated();
-		} else {
-			notifications.notifyAdmin("getting bittrex data failed", error+", status="+(response ? response.statusCode : '?'));
-			console.log("Can't get currency rates from bittrex, will retry later");
 		}
+		catch (e) {
+			return notifications.notifyAdmin("parsing bittrex response failed", e.toString());
+		}
+		checkAllRatesUpdated();
 	});
 }
 
