@@ -153,6 +153,7 @@ function moveFundsToAttestorAddresses() {
 				headlessWallet.sendMultiPayment({
 					asset: null,
 					to_address: emailAttestation.emailAttestorAddress,
+					change_address: emailAttestation.emailAttestorAddress,
 					send_all: true,
 					paying_addresses: arrAddresses
 				}, (err, unit) => {
