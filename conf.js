@@ -43,6 +43,7 @@ exports.MIN_AVAILABLE_WITNESSINGS = 100;
 exports.priceInBytes = 500000;
 exports.rewardInUSD = 10;
 exports.referralRewardInUSD = 10;
+exports.bAcceptUnconfirmedPayments = false;
 
 exports.objRewardWhiteListEmails = {
 	'@harvard.edu': /^[a-z\d-_.]+@harvard\.edu$/i,
