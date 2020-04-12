@@ -242,7 +242,11 @@ function handleNewTransactions(arrUnits) {
 								VALUES (?,?,?,?)`,
 								[row.receiving_address, row.price, row.amount, row.unit],
 								() => {
-									device.sendMessageToDevice(row.device_address, 'text', i18n.__('receivedYourPayment', {receivedInGBytes:row.amount/1e9}));
+									if (conf.bAcceptUnconfirmedPayments) {
+										handleTransactionsBecameStable([row.unit]);
+									}
+									else
+										device.sendMessageToDevice(row.device_address, 'text', i18n.__('receivedYourPayment', {receivedInGBytes:row.amount/1e9}));
 								}
 							);
 
@@ -290,7 +294,7 @@ function handleTransactionsBecameStable(arrUnits) {
 			device_address, user_address, user_email
 		FROM transactions
 		JOIN receiving_addresses USING(receiving_address)
-		WHERE payment_unit IN(?)`,
+		WHERE payment_unit IN(?) AND is_confirmed=0`,
 		[arrUnits],
 		(rows) => {
 			rows.forEach((row) => {
@@ -482,7 +486,7 @@ function respond (from_address, text, response = '') {
 							code, result, attestation_date
 						FROM transactions
 						JOIN receiving_addresses USING(receiving_address)
-						LEFT JOIN verification_emails USING(transaction_id, user_email)
+						JOIN verification_emails USING(transaction_id, user_email)
 						LEFT JOIN attestation_units USING(transaction_id)
 						WHERE receiving_address=?
 						ORDER BY transaction_id DESC
@@ -552,7 +556,7 @@ function respond (from_address, text, response = '') {
 												code, result, number_of_attempts, user_email
 											FROM transactions
 											JOIN receiving_addresses USING(receiving_address)
-											LEFT JOIN verification_emails USING(transaction_id, user_email)
+											JOIN verification_emails USING(transaction_id, user_email)
 											WHERE receiving_address=? AND transaction_id=?
 											LIMIT 1`,
 											[receiving_address, transaction_id],
