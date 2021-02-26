@@ -16,5 +16,8 @@
   },
   "scripts": {
     "test": "node test/locales.js && node test/whitelisted-emails.js"
+  },
+  "resolutions": {
+    "level-rocksdb": "^4.0.0"
   }
 }
