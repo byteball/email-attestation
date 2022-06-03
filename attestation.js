@@ -13,6 +13,8 @@ const emailAttestation = require('./modules/email_attestation');
 const notifications = require('./modules/notifications');
 const randomCryptoString = require('./modules/random-crypto-string');
 const i18nModule = require("i18n");
+const headlessWallet = require('headless-obyte');
+
 const arrWhitelistEmails = Object.keys(conf.objRewardWhiteListEmails);
 
 

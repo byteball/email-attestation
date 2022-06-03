@@ -1,25 +1,14 @@
 /*jslint node: true */
 'use strict';
-const request = require('request');
 const eventBus = require('ocore/event_bus.js');
-const notifications = require('./notifications');
+const network = require('ocore/network.js');
 
-let GBYTE_BTC_rate;
-let BTC_USD_rate;
 
 let bRatesReady = false;
-function checkAllRatesUpdated() {
-	if (bRatesReady) {
-		return;
-	}
-	if (GBYTE_BTC_rate && BTC_USD_rate) {
-		bRatesReady = true;
-		console.log('rates are ready');
-		console.log(`1$ = ${getPriceInBytes(1)} Bytes at ${new Date()}`);
-		const headlessWallet = require('headless-obyte'); // start loading headless only when rates are ready
-		checkRatesAndHeadless();
-	}
-}
+eventBus.once('rates_updated', () => {
+	bRatesReady = true;
+	checkRatesAndHeadless();
+});
 
 let bHeadlessReady = false;
 eventBus.once('headless_wallet_ready', () => {
@@ -33,46 +22,14 @@ function checkRatesAndHeadless() {
 	}
 }
 
-function updateBittrexRates() {
-	console.log('updating bittrex');
-	const apiUri = 'https://bittrex.com/api/v1.1/public/getmarketsummaries';
-	request(apiUri, (error, response, body) => {
-		if (error || response.statusCode !== 200)
-			return notifications.notifyAdmin("getting bittrex data failed", error + ", status=" + (response ? response.statusCode : '?'));
-		try {
-			let arrCoinInfos = JSON.parse(body).result;
-			arrCoinInfos.forEach(coinInfo => {
-				let price = coinInfo.Last; // number
-				if (!price)
-					return;
-
-				if (coinInfo.MarketName === 'USDT-BTC') {
-					BTC_USD_rate = price;
-				} else if (coinInfo.MarketName === 'BTC-GBYTE') {
-					GBYTE_BTC_rate = price;
-				}
-			});
-		}
-		catch (e) {
-			return notifications.notifyAdmin("parsing bittrex response failed", e.toString());
-		}
-		checkAllRatesUpdated();
-	});
-}
 
 function getPriceInBytes(priceInUSD) {
-	if (!bRatesReady) {
+	const rates = network.exchangeRates;
+	if (!rates.GBYTE_USD)
 		throw Error("rates not ready yet");
-	}
-	return Math.round(1e9 * priceInUSD / (GBYTE_BTC_rate * BTC_USD_rate));
+	return Math.round(1e9 * priceInUSD / rates.GBYTE_USD);
 }
 
-function enableRateUpdates() {
-	setInterval(updateBittrexRates, 600*1000);
-}
-
-updateBittrexRates();
-enableRateUpdates();
 
 exports.getPriceInBytes = getPriceInBytes;
 
